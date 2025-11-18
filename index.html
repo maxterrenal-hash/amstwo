@@ -709,7 +709,7 @@ document.getElementById("pharmSubmit").onclick = async () => {
       body: JSON.stringify({
         action: "approveWithPharmacist",
         fileId: pendingPharmFileId,
-        dispensedBy: name,
+        dispensedby: name,
       }),
     });
   }
@@ -720,7 +720,7 @@ document.getElementById("pharmSubmit").onclick = async () => {
       body: JSON.stringify({
         action: "markIdsApproval",
         fileId: pendingPharmFileId,
-        dispensedBy: name,
+        dispensedby: name,
       }),
     });
   }
@@ -732,7 +732,7 @@ document.getElementById("pharmSubmit").onclick = async () => {
         action: "rejectWithReason",
         fileId: pendingPharmFileId,
         reason: pendingPharmExtra,
-        dispensedBy: name,
+        dispensedby: name,
       }),
     });
   }
@@ -758,7 +758,7 @@ function openDetails(entry) {
       : "Pediatrics Resident";
 
   box.innerHTML = `
-    <p><strong>Patient:</strong> ${d.patientName} (${d.age} y, ${d.sex})</p>
+    <p><strong>Patient:</strong> ${d.patientname} (${d.age} y, ${d.sex})</p>
     <p><strong>Hospital #:</strong> ${d.hospitalnumber}</p>
     <p><strong>Ward:</strong> ${d.ward}</p>
     <p><strong>Diagnosis:</strong> ${d.diagnosis}</p>
@@ -774,17 +774,17 @@ function openDetails(entry) {
 
     <p><strong>Scr:</strong> ${d.scrmgdl}</p>
     <p><strong>SGPT:</strong> ${d.sgpt}</p>
-    <p><strong>eGFR:</strong> ${d.egfrText}</p>
+    <p><strong>eGFR:</strong> ${d.egfrtext}</p>
     <hr>
 
-    <p><strong>Resident:</strong> ${d.residentName} (${d.clinicaldept})</p>
-<p><strong>Date:</strong> ${d.reqdate || d.reqdate || d.requestdate || d.date}</p>
+    <p><strong>Resident:</strong> ${d.residentname} (${d.clinicaldept})</p>
+<p><strong>Date:</strong> ${d.reqdate || d.date}</p>
 
     ${
       d.drugtype === "Restricted"
         ? `
           <p><strong>${resLabel}:</strong> ${d.serviceresidentname}</p>
-          <p><strong>IDS Specialist:</strong> ${d.idSpecialist}</p>
+          <p><strong>IDS Specialist:</strong> ${d.infectiousdiseasespecialist}</p>
         `
         : ""
     }
@@ -796,8 +796,8 @@ function openDetails(entry) {
     }
 
     ${
-      d.dispensed
-        ? `<p><strong>Dispensed By:</strong> ${d.dispensedBy}</p>`
+      d.dispenseddate
+        ? `<p><strong>Dispensed By:</strong> ${d.dispenseddateBy}</p>`
         : ""
     }
 
@@ -876,7 +876,7 @@ function renderPending() {
     card.className = "card";
     card.innerHTML = `
       <div class="card-header">
-        <strong>${d.patientName}</strong>
+        <strong>${d.patientname}</strong>
 <span class="tag ${ (d.drugtype || "").toLowerCase() }">
   ${d.drugtype || "Unknown"}
 </span>
@@ -888,11 +888,11 @@ function renderPending() {
 
       ${
         d.drugtype === "Restricted"
-          ? `<div><strong>IDS:</strong> ${d.idSpecialist}</div>`
+          ? `<div><strong>IDS:</strong> ${d.infectiousdiseasespecialist}</div>`
           : ""
       }
 
-      <div><strong>Date:</strong> ${d.reqdate || d.reqdate || d.requestdate || d.date}</div>
+      <div><strong>Date:</strong> ${d.reqdate || d.date}</div>
 
       <div class="actions">
         ${
@@ -980,7 +980,7 @@ function renderList(cfg) {
 
     row.innerHTML = `
       <div style="flex:1;">
-        <strong>${d.patientName}</strong> (${d.hospitalnumber})<br>
+        <strong>${d.patientname}</strong> (${d.hospitalnumber})<br>
         ${d.antimicrobial} — ${d.dose} (${d.frequency})<br>
 <span class="tag ${ (d.drugtype || "").toLowerCase() }">
   ${d.drugtype || "Unknown"}
@@ -988,7 +988,7 @@ function renderList(cfg) {
       </div>
 
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem;">
-          <div>${d.reqdate || d.reqdate || d.requestdate || d.date}</div>
+          <div>${d.reqdate || d.date}</div>
         <div style="display:flex; gap:0.4rem;">
           ${actionButtons}
           <button class="btn delete delete-row">Delete</button>
@@ -1083,7 +1083,7 @@ function renderCharts(data) {
   if (chartIDS) chartIDS.destroy();
 
   const byDate = {};
-  data.forEach((e) => byDate[e.data.reqDate] = (byDate[e.data.reqDate] || 0) + 1);
+  data.forEach((e) => byDate[e.data.reqdate] = (byDate[e.data.reqdate] || 0) + 1);
 
   chartRequests = new Chart(document.getElementById("chartRequests"), {
     type: "line",
@@ -1130,8 +1130,8 @@ function renderCharts(data) {
 
   const byIDS = {};
   data.forEach((e) => {
-    if (!e.data.idSpecialist) return;
-    byIDS[e.data.idSpecialist] = (byIDS[e.data.idSpecialist] || 0) + 1;
+    if (!e.data.infectiousdiseasespecialist) return;
+    byIDS[e.data.infectiousdiseasespecialist] = (byIDS[e.data.infectiousdiseasespecialist] || 0) + 1;
   });
 
   chartIDS = new Chart(document.getElementById("chartIDS"), {
@@ -1169,16 +1169,16 @@ function renderTopTables(data) {
       byReject[d.disapprovedreason] =
         (byReject[d.disapprovedreason] || 0) + 1;
 
-    if (d.idSpecialist)
-      byIDS[d.idSpecialist] = (byIDS[d.idSpecialist] || 0) + 1;
+    if (d.infectiousdiseasespecialist)
+      byIDS[d.infectiousdiseasespecialist] = (byIDS[d.infectiousdiseasespecialist] || 0) + 1;
 
-    if (d.status === "approved" && d.dispenseddate && d.reqdate || d.reqdate || d.requestdate || d.date) {
-      const tat =
-        (new Date(d.dispenseddate) - new Date(d.reqdate || d.reqdate || d.requestdate || d.date)) /
-        (1000 * 60 * 60 * 24);
+if (d.status === "approved" && d.dispenseddate && (d.reqdate || d.date)) {
+  const tat =
+    (new Date(d.dispenseddate) - new Date(d.reqdate || d.date)) /
+    (1000 * 60 * 60 * 24);
+  tatValues.push(tat);
+}
 
-      tatValues.push(tat);
-    }
   });
 
   document.getElementById("topWards").innerHTML =
@@ -1228,7 +1228,7 @@ function renderHeatmap(data) {
   wards.forEach((w) => (map[w] = {}));
   data.forEach((e) => {
     const d = e.data;
-    map[d.ward][d.reqdate || d.reqdate || d.requestdate || d.date] = (map[d.ward][d.reqdate || d.reqdate || d.requestdate || d.date] || 0) + 1;
+    map[d.ward][d.reqdate || d.date] = (map[d.ward][d.reqdate || d.date] || 0) + 1;
   });
 
   let html = `<table class="heatmap-table"><thead><tr><th>Ward</th>`;
@@ -1272,7 +1272,7 @@ function convertToCSV(data) {
   const rows = data.map((e) => {
     const d = e.data;
     return [
-      d.patientName,
+      d.patientname,
       d.hospitalnumber,
       d.ward,
       d.antimicrobial,
@@ -1280,8 +1280,8 @@ function convertToCSV(data) {
       d.frequency,
       d.duration,
       d.drugtype,
-      d.residentName,
-      d.reqdate || d.reqdate || d.requestdate || d.date,
+      d.residentname,
+      d.reqdate || d.date,
       d.status,
     ].join(",");
   });
@@ -1312,8 +1312,10 @@ exportFilteredCsv.onclick = () => {
 
   const filtered = ALL_DATA.filter((e) => {
     const d = e.data;
-    if (f && d.reqdate || d.reqdate || d.requestdate || d.date < f) return false;;
-    if (t && d.reqdate || d.reqdate || d.requestdate || d.date > t) return false;
+const rd = d.reqdate || d.date;
+
+if (f && rd < f) return false;
+if (t && rd > t) return false;
     if (w && d.ward !== w) return false;
     if (type && d.drugtype !== type) return false;
     if (ap && d.mode !== ap) return false;
