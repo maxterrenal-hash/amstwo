@@ -778,7 +778,7 @@ function openDetails(entry) {
     <hr>
 
     <p><strong>Resident:</strong> ${d.residentName} (${d.clinicaldept})</p>
-    <p><strong>Date:</strong> ${d.reqdate}</p>
+    <p><strong>Date:</strong> ${d.date}</p>
 
     ${
       d.drugtype === "Restricted"
@@ -892,7 +892,7 @@ function renderPending() {
           : ""
       }
 
-      <div><strong>Date:</strong> ${d.reqdate}</div>
+      <div><strong>Date:</strong> ${d.date}</div>
 
       <div class="actions">
         ${
@@ -955,7 +955,7 @@ function renderList(cfg) {
   const filtered = ALL_DATA.filter((e) => {
     const d = e.data;
     if (cfg.matchStatus && d.status !== cfg.matchStatus) return false;
-    if (date && d.reqdate !== date) return false;
+    if (date && d.date !== date) return false;
     if (search && !String(d.hospitalnumber).includes(search)) return false;
     if (ids && d.idsspecialist !== ids) return false;
     return true;
@@ -987,7 +987,7 @@ function renderList(cfg) {
       </div>
 
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem;">
-        <div>${d.reqdate}</div>
+        <div>${d.date}</div>
         <div style="display:flex; gap:0.4rem;">
           ${actionButtons}
           <button class="btn delete delete-row">Delete</button>
@@ -1038,8 +1038,8 @@ function applyAnalysisFilters() {
 
   const data = ALL_DATA.filter((e) => {
     const d = e.data;
-    if (f && d.reqdate < f) return false;
-    if (t && d.reqdate > t) return false;
+    if (f && d.date < f) return false;;
+    if (t && d.date > t) return false;
     if (w && d.ward !== w) return false;
     if (type && d.drugtype !== type) return false;
     if (ap && d.mode !== ap) return false;
@@ -1170,10 +1170,11 @@ function renderTopTables(data) {
     if (d.idSpecialist)
       byIDS[d.idSpecialist] = (byIDS[d.idSpecialist] || 0) + 1;
 
-    if (d.status === "approved" && d.dispenseddate && d.reqdate) {
+    if (d.status === "approved" && d.dispenseddate && d.date) {
       const tat =
-        (new Date(d.dispenseddate) - new Date(d.reqdate)) /
+        (new Date(d.dispenseddate) - new Date(d.date)) /
         (1000 * 60 * 60 * 24);
+
       tatValues.push(tat);
     }
   });
@@ -1219,13 +1220,13 @@ function renderTopTables(data) {
 
 function renderHeatmap(data) {
   const wards = [...new Set(data.map((e) => e.data.ward))];
-  const dates = [...new Set(data.map((e) => e.data.reqDate))].sort();
+  const dates = [...new Set(data.map((e) => e.data.date))].sort();
 
   const map = {};
   wards.forEach((w) => (map[w] = {}));
   data.forEach((e) => {
     const d = e.data;
-    map[d.ward][d.reqdate] = (map[d.ward][d.reqdate] || 0) + 1;
+    map[d.ward][d.date] = (map[d.ward][d.date] || 0) + 1;
   });
 
   let html = `<table class="heatmap-table"><thead><tr><th>Ward</th>`;
@@ -1278,7 +1279,7 @@ function convertToCSV(data) {
       d.duration,
       d.drugtype,
       d.residentName,
-      d.reqdate,
+      d.date,
       d.status,
     ].join(",");
   });
@@ -1309,8 +1310,8 @@ exportFilteredCsv.onclick = () => {
 
   const filtered = ALL_DATA.filter((e) => {
     const d = e.data;
-    if (f && d.reqdate < f) return false;
-    if (t && d.reqdate > t) return false;
+    if (f && d.date < f) return false;;
+    if (t && d.date > t) return false;
     if (w && d.ward !== w) return false;
     if (type && d.drugtype !== type) return false;
     if (ap && d.mode !== ap) return false;
