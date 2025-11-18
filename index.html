@@ -1,0 +1,1385 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Ospital ng Makati – Antimicrobial Request System (Pharmacy)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+
+.list-item .btn {
+  min-width: 100px;
+  text-align: center;
+}
+
+/* =============================
+   THEME COLORS
+   ============================= */
+:root {
+  --osmak-green: #009a3e;
+  --osmak-green-dark: #007530;
+  --osmak-red: #dc2626;
+  --amber: #f59e0b;
+  --amber-dark: #b45309;
+  --bg-main: #f5f5f5;
+  --bg-card: #ffffff;
+  --text-main: #111827;
+  --text-muted: #6b7280;
+  --border: #d1d5db;
+
+  --heat-low: #e8f5e9;
+  --heat-mid: #81c784;
+  --heat-high: #388e3c;
+  --heat-restricted-mid: #ef9a9a;
+  --heat-restricted-high: #d32f2f;
+}
+
+/* =============================
+   BASE LAYOUT
+   ============================= */
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, sans-serif;
+  background: var(--bg-main);
+  color: var(--text-main);
+}
+
+/* Sticky header */
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--osmak-green);
+  color: #fff;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
+
+header img { height: 48px; }
+header h1 { margin: 0; font-size: 1.2rem; }
+
+/* =============================
+   MAIN + TABS (sticky)
+   ============================= */
+.main {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0.5rem 1rem 2rem;
+}
+
+.tabs {
+  position: sticky;
+  top: 72px;
+  z-index: 90;
+  background: var(--bg-main);
+  padding: 0.5rem 0 0.75rem;
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+}
+
+/* FIX BROKEN TABS */
+.section {
+  display: none;
+}
+.section.active {
+  display: block;
+}
+
+.tab-btn {
+  background: white;
+  border: 1px solid var(--border);
+  padding: 0.45rem 0.8rem;
+  border-radius: 0.4rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+.tab-btn.active {
+  background: var(--osmak-green);
+  color: #fff;
+  border-color: var(--osmak-green-dark);
+}
+
+/* =============================
+   SEARCH ROWS
+   ============================= */
+.search-row {
+  display: flex;
+  gap: 0.6rem;
+  margin: 0.7rem 0;
+  flex-wrap: wrap;
+}
+.search-row input,
+.search-row select {
+  padding: 0.45rem;
+  border: 1px solid var(--border);
+  border-radius: 0.4rem;
+  font-size: 0.9rem;
+}
+
+/* =============================
+   PENDING CARDS
+   ============================= */
+.card {
+  background: var(--bg-card);
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid var(--border);
+  margin-bottom: 1rem;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  cursor: pointer;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+/* Pill Tags */
+.tag {
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.72rem;
+  font-weight: 600;
+}
+.tag.monitored {
+  color: var(--osmak-green-dark);
+  background: rgba(0,154,62,0.15);
+}
+.tag.restricted {
+  color: var(--osmak-red);
+  background: rgba(220,38,38,0.15);
+}
+.tag.ids-pill {
+  background: rgba(245,158,11,0.22);
+  border: 1px solid var(--amber);
+  color: var(--amber-dark);
+}
+
+/* =============================
+   LIST VIEW
+   ============================= */
+.list-container {
+  max-height: 540px;
+  overflow-y: auto;
+  border: 1px solid var(--border);
+  background: #fff;
+  border-radius: 0.5rem;
+}
+
+.list-item {
+  padding: 0.8rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+  cursor: pointer;
+}
+.list-item:hover { background: #fafafa; }
+
+/* =============================
+   ACTION BUTTONS
+   ============================= */
+.actions {
+  margin-top: 0.6rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.btn {
+  border: none;
+  padding: 0.45rem 0.75rem;
+  font-size: 0.8rem;
+  border-radius: 0.4rem;
+  cursor: pointer;
+}
+.btn.approve { background: var(--osmak-green); color: white; }
+.btn.reject { background: var(--osmak-red); color: white; }
+.btn.for-ids { background: var(--amber); color: #fff; }
+.btn.delete { background: #6b7280; color: white; }
+.btn.cancel { background: #4b5563; color: white; }
+
+/* =============================
+   MODALS
+   ============================= */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 60;
+}
+
+.modal-box {
+  background: #fff;
+  border-radius: 0.75rem;
+  width: 90%;
+  max-width: 680px;
+  max-height: 85vh;
+  overflow-y: auto;
+}
+
+.modal-header {
+  padding: 0.8rem 1rem;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: space-between;
+}
+.modal-body {
+  padding: 1rem;
+}
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+/* Reject reason modal */
+#rejectReasonOther {
+  display: none;
+}
+
+/* Confirmation modal */
+.confirm-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  display: none;
+  align-items: center;
+  justify-content: center;
+  z-index: 70;
+}
+.confirm-box {
+  background: white;
+  padding: 1rem;
+  border-radius: 0.6rem;
+  width: 300px;
+}
+
+/* =============================
+   DATA ANALYSIS
+   ============================= */
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.tile {
+  padding: 1rem;
+  border-radius: 0.7rem;
+  background: white;
+  border: 1px solid var(--border);
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+.tile-number {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-top: 0.4rem;
+}
+
+.heatmap-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+.heatmap-table th,
+.heatmap-table td {
+  border: 1px solid var(--border);
+  padding: 0.6rem;
+  text-align: center;
+}
+
+.heat-low { background: var(--heat-low); }
+.heat-mid { background: var(--heat-mid); color:white; }
+.heat-high { background: var(--heat-high); color:white; }
+.heat-restricted-mid { background: var(--heat-restricted-mid); color:white; }
+.heat-restricted-high { background: var(--heat-restricted-high); color:white; }
+
+@media(max-width: 600px) {
+  header { flex-direction: column; text-align: center; }
+  .tab-btn { flex:1 1 45%; text-align:center; }
+  .search-row { flex-direction: column; }
+  .list-item { flex-direction: column; align-items: flex-start; }
+}
+
+</style>
+</head>
+
+<body>
+
+<header>
+  <img src="https://maxterrenal-hash.github.io/justculture/osmak-logo.png">
+  <div>
+    <h1>OSPITAL NG MAKATI</h1>
+    <div>Antimicrobial Request System - Pharmacy Module</div>
+  </div>
+</header>
+
+<div id="updateBadge" 
+     style="position:fixed; top:10px; right:10px; background:#fff3cd; 
+            color:#8a6d3b; padding:4px 10px; font-size:0.75rem; 
+            border-radius:4px; border:1px solid #f0e1a0; 
+            display:none; z-index:200;">
+  Updating…
+</div>
+
+<div class="main">
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="pending">Pending</button>
+    <button class="tab-btn" data-tab="approved">Approved</button>
+    <button class="tab-btn" data-tab="rejected">Rejected</button>
+    <button class="tab-btn" data-tab="ids">IDS Approval</button>
+    <button class="tab-btn" data-tab="analysis">Data Analysis</button>
+  </div>
+
+  <!-- ===========================
+       PENDING
+       =========================== -->
+  <div class="section active" id="pending">
+    <div class="search-row">
+      <input type="text" id="pendingSearch" placeholder="Search Hospital Number">
+    </div>
+    <div id="pendingList"></div>
+  </div>
+
+  <!-- ===========================
+       APPROVED
+       =========================== -->
+  <div class="section" id="approved">
+    <div class="search-row">
+      <input type="date" id="approvedDate">
+      <input type="text" id="approvedSearch" placeholder="Search Hospital Number">
+    </div>
+    <div class="list-container" id="approvedList"></div>
+  </div>
+
+  <!-- ===========================
+       REJECTED
+       =========================== -->
+  <div class="section" id="rejected">
+    <div class="search-row">
+      <input type="date" id="rejectedDate">
+      <input type="text" id="rejectedSearch" placeholder="Search Hospital Number">
+    </div>
+    <div class="list-container" id="rejectedList"></div>
+  </div>
+
+  <!-- ===========================
+       IDS APPROVAL
+       =========================== -->
+  <div class="section" id="ids">
+    <div class="search-row">
+      <select id="idsFilter">
+        <option value="">Filter by IDS</option>
+        <option>Dr. Christopher John Tibayan</option>
+        <option>Dr. Paulo Garcia</option>
+        <option>Dr. Jelly Ann Gozun-Recuenco</option>
+        <option>Dr. Michelle Carandang-Cuvin</option>
+        <option>Pia Catrina Tolentino Torres</option>
+      </select>
+      <input type="date" id="idsDate">
+    </div>
+    <div class="list-container" id="idsList"></div>
+  </div>
+
+  <!-- ===========================
+       ANALYSIS
+       =========================== -->
+  <div class="section" id="analysis">
+
+    <div class="search-row">
+      <input type="date" id="fromDate">
+      <input type="date" id="toDate">
+      <select id="wardFilter"></select>
+      <select id="typeFilter">
+        <option value="">All Types</option>
+        <option>Monitored</option>
+        <option>Restricted</option>
+      </select>
+      <select id="apFilter">
+        <option value="">Adult + Pediatric</option>
+        <option value="adult">Adult</option>
+        <option value="pedia">Pedia</option>
+      </select>
+      <select id="idsFilterAnalysis">
+        <option value="">All IDS</option>
+        <option>Dr. Christopher John Tibayan</option>
+        <option>Dr. Paulo Garcia</option>
+        <option>Dr. Jelly Ann Gozun-Recuenco</option>
+        <option>Dr. Michelle Carandang-Cuvin</option>
+        <option>Pia Catrina Tolentino Torres</option>
+      </select>
+      <button class="btn approve" id="applyAnalysis">Apply</button>
+    </div>
+
+    <div style="display:flex; gap:0.5rem;">
+      <button class="btn approve" id="exportFilteredCsv">Export Filtered CSV</button>
+      <button class="btn delete" id="exportAllCsv">Export ALL CSV</button>
+    </div>
+
+    <div class="dashboard-grid" id="analysisTiles"></div>
+
+    <canvas id="chartRequests" height="180" style="margin-top:1rem;"></canvas>
+    <canvas id="chartTopAbx" height="180" style="margin-top:1rem;"></canvas>
+    <canvas id="chartApproval" height="180" style="margin-top:1rem;"></canvas>
+    <canvas id="chartIDS" height="180" style="margin-top:1rem;"></canvas>
+
+    <h3>Ward Heatmap</h3>
+    <div id="heatmapContainer"></div>
+
+    <h3>Top Wards</h3>
+    <div id="topWards"></div>
+
+    <h3>Top Antibiotics</h3>
+    <div id="topAbx"></div>
+
+    <h3>Indications Breakdown</h3>
+    <div id="topIndications"></div>
+
+    <h3>Rejection Reasons</h3>
+    <div id="rejectTable"></div>
+
+    <h3>IDS Workload</h3>
+    <div id="idsWorkloadTable"></div>
+
+    <h3>Turnaround Times</h3>
+    <div id="tatTable"></div>
+
+  </div>
+
+</div>
+
+<!-- ========== MODALS ========== -->
+
+<div class="modal-backdrop" id="detailsBackdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Request Details</h3>
+      <button class="close-btn" id="detailsClose">✕</button>
+    </div>
+    <div class="modal-body" id="detailsBody"></div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="pharmacistBackdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Dispensed By</h3>
+    </div>
+    <div class="modal-body">
+      <label>Pharmacist:</label>
+      <input type="text" id="pharmName" style="width:100%; margin-bottom:1rem;">
+      <button class="btn approve" id="pharmSubmit">Submit</button>
+      <button class="btn reject" id="pharmCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="confirm-backdrop" id="confirmBackdrop">
+  <div class="confirm-box">
+    <p id="confirmMsg"></p>
+    <button id="confirmYes" class="btn approve">Yes</button>
+    <button id="confirmNo" class="btn reject">Cancel</button>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="reasonBackdrop">
+  <div class="modal-box">
+    <div class="modal-header">
+      <h3>Disapproval Reason</h3>
+    </div>
+    <div class="modal-body">
+      <select id="rejectReason" style="width:100%; padding:0.5rem;">
+        <option>No infection</option>
+        <option>Wrong choice</option>
+        <option>Wrong dose</option>
+        <option>Wrong route</option>
+        <option>Wrong duration</option>
+        <option>Others (specify)</option>
+      </select>
+      <input type="text" id="rejectReasonOther" placeholder="Specify..." style="width:100%; margin-top:0.7rem; padding:0.5rem;">
+      <button class="btn approve" id="rejectSubmit">Submit</button>
+      <button class="btn reject" id="rejectCancel">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+/* ==========================================================
+   CONFIG
+   ========================================================== */
+const API =
+  "https://script.google.com/macros/s/AKfycbwfMBx9dHNc5H7aor-lorJ9b57SLddSar_6sQZWr8rrGkpY5xF7q_LsKctPwHwShcb7/exec";
+
+let ALL_DATA = [];
+let pendingAction = null;
+let tempFileId = null;
+let currentRejectFileId = null;
+
+let pendingPharmAction = null;   // approve | disapprove | for_ids_approval
+let pendingPharmFileId = null;   // fileId to update
+let pendingPharmExtra = null;    // reject reason
+
+let chartRequests, chartTopAbx, chartApproval, chartIDS;
+
+/* ==========================================================
+   LOADING INDICATOR
+   ========================================================== */
+function showLoading() {
+  document.body.style.opacity = "0.4";
+  document.body.style.pointerEvents = "none";
+}
+function hideLoading() {
+  document.body.style.opacity = "1";
+  document.body.style.pointerEvents = "auto";
+}
+
+/* ==========================================================
+   LOCAL CACHE (FAST REFRESH)
+   ========================================================== */
+const CACHE_KEY = "AMS_DATA_CACHE_V1";
+const CACHE_TIME_KEY = "AMS_CACHE_TIME_V1";
+const CACHE_MAX_AGE = 1000 * 60 * 2; // 2 minutes
+
+function showUpdatingBadge() {
+  document.getElementById("updateBadge").style.display = "block";
+}
+function hideUpdatingBadge() {
+  document.getElementById("updateBadge").style.display = "none";
+}
+
+function loadCache() {
+  try {
+    const cached = localStorage.getItem(CACHE_KEY);
+    if (!cached) return null;
+    return JSON.parse(cached);
+  } catch {
+    return null;
+  }
+}
+function saveCache(data) {
+  localStorage.setItem(CACHE_KEY, JSON.stringify(data));
+  localStorage.setItem(CACHE_TIME_KEY, Date.now());
+}
+function cacheExpired() {
+  const last = Number(localStorage.getItem(CACHE_TIME_KEY) || 0);
+  return Date.now() - last > CACHE_MAX_AGE;
+}
+
+/* ==========================================================
+   LOAD DATA
+   ========================================================== */
+async function loadData(force = false) {
+  showLoading();
+
+  if (!force) {
+    const cached = loadCache();
+    if (cached && !cacheExpired()) {
+      ALL_DATA = cached;
+      setDefaultDates();
+      renderAll();
+      hideLoading();
+      backgroundRefresh();
+      return;
+    }
+  }
+
+  try {
+    showUpdatingBadge();
+    const res = await fetch(API);
+    const json = await res.json();
+    ALL_DATA = json.entries || [];
+
+    saveCache(ALL_DATA);
+    setDefaultDates();
+    renderAll();
+  } catch (err) {
+    console.error("Fetch error:", err);
+  }
+
+  hideUpdatingBadge();
+  hideLoading();
+}
+
+/* ==========================================================
+   DEFAULT DATES
+   ========================================================== */
+function setDefaultDates() {
+  const today = new Date().toISOString().split("T")[0];
+  [
+    "pendingDate",
+    "approvedDate",
+    "rejectedDate",
+    "idsDate",
+    "fromDate",
+    "toDate"
+  ].forEach(id => {
+    const el = document.getElementById(id);
+    if (el && !el.value) el.value = today;
+  });
+}
+
+/* ==========================================================
+   CONFIRM ACTION MODAL
+   ========================================================== */
+function confirmAction(msg, cb) {
+  document.getElementById("confirmMsg").textContent = msg;
+  pendingAction = cb;
+  document.getElementById("confirmBackdrop").style.display = "flex";
+}
+document.getElementById("confirmNo").onclick = () => {
+  pendingAction = null;
+  document.getElementById("confirmBackdrop").style.display = "none";
+};
+document.getElementById("confirmYes").onclick = () => {
+  if (pendingAction) pendingAction();
+  pendingAction = null;
+  document.getElementById("confirmBackdrop").style.display = "none";
+};
+
+/* ==========================================================
+   REJECTION REASON MODAL
+   ========================================================== */
+document.getElementById("rejectReason").onchange = (e) => {
+  document.getElementById("rejectReasonOther").style.display =
+    e.target.value === "Others (specify)" ? "block" : "none";
+};
+
+document.getElementById("rejectCancel").onclick = () => {
+  currentRejectFileId = null;
+  document.getElementById("reasonBackdrop").style.display = "none";
+};
+
+document.getElementById("rejectSubmit").onclick = () => {
+  if (!currentRejectFileId) return;
+
+  let reason = document.getElementById("rejectReason").value;
+  if (reason === "Others (specify)") {
+    const other = document.getElementById("rejectReasonOther").value.trim();
+    if (other) reason = other;
+  }
+
+  pendingPharmAction = "disapprove";
+  pendingPharmFileId = currentRejectFileId;
+  pendingPharmExtra = reason;
+
+  document.getElementById("reasonBackdrop").style.display = "none";
+  openPharmacistModal();
+};
+
+/* ==========================================================
+   PHARMACIST MODAL
+   ========================================================== */
+function openPharmacistModal() {
+  document.getElementById("pharmName").value = "";
+  document.getElementById("pharmacistBackdrop").style.display = "flex";
+}
+
+document.getElementById("pharmCancel").onclick = () => {
+  pendingPharmAction = null;
+  pendingPharmFileId = null;
+  pendingPharmExtra = null;
+  document.getElementById("pharmacistBackdrop").style.display = "none";
+};
+
+document.getElementById("pharmSubmit").onclick = async () => {
+  const name = document.getElementById("pharmName").value.trim();
+  if (!name) return alert("Pharmacist name required.");
+
+  document.getElementById("pharmacistBackdrop").style.display = "none";
+  showLoading();
+
+  if (pendingPharmAction === "approve") {
+    await fetch(API, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "approveWithPharmacist",
+        fileId: pendingPharmFileId,
+        dispensedBy: name,
+      }),
+    });
+  }
+
+  if (pendingPharmAction === "for_ids_approval") {
+    await fetch(API, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "markIdsApproval",
+        fileId: pendingPharmFileId,
+        dispensedBy: name,
+      }),
+    });
+  }
+
+  if (pendingPharmAction === "disapprove") {
+    await fetch(API, {
+      method: "POST",
+      body: JSON.stringify({
+        action: "rejectWithReason",
+        fileId: pendingPharmFileId,
+        reason: pendingPharmExtra,
+        dispensedBy: name,
+      }),
+    });
+  }
+
+  pendingPharmAction = null;
+  pendingPharmFileId = null;
+  pendingPharmExtra = null;
+
+  hideLoading();
+  loadData();
+};
+
+/* ==========================================================
+   DETAILS MODAL
+   ========================================================== */
+function openDetails(entry) {
+  const d = entry.data;
+  const box = document.getElementById("detailsBody");
+
+  const resLabel =
+    d.mode === "adult"
+      ? "Internal Medicine Resident"
+      : "Pediatrics Resident";
+
+  box.innerHTML = `
+    <p><strong>Patient:</strong> ${d.patientName} (${d.age} y, ${d.sex})</p>
+    <p><strong>Hospital #:</strong> ${d.hospitalNumber}</p>
+    <p><strong>Ward:</strong> ${d.ward}</p>
+    <p><strong>Diagnosis:</strong> ${d.diagnosis}</p>
+    <hr>
+
+    <p><strong>Drug:</strong> ${d.antimicrobial}</p>
+    <p><strong>Dose:</strong> ${d.dose}</p>
+    <p><strong>Frequency:</strong> ${d.frequency}</p>
+    <p><strong>Duration:</strong> ${d.duration} days</p>
+    <p><strong>Drug Type:</strong> ${d.drugType}</p>
+    <p><strong>Indication:</strong> ${d.indication}</p>
+    <hr>
+
+    <p><strong>Scr:</strong> ${d.scrMgDl}</p>
+    <p><strong>SGPT:</strong> ${d.sgpt}</p>
+    <p><strong>eGFR:</strong> ${d.egfrText}</p>
+    <hr>
+
+    <p><strong>Resident:</strong> ${d.residentName} (${d.clinicalDept})</p>
+    <p><strong>Date:</strong> ${d.reqDate}</p>
+
+    ${
+      d.drugType === "Restricted"
+        ? `
+          <p><strong>${resLabel}:</strong> ${d.serviceResidentName}</p>
+          <p><strong>IDS Specialist:</strong> ${d.idSpecialist}</p>
+        `
+        : ""
+    }
+
+    ${
+      d.disapprovedReason
+        ? `<p><strong>Disapproved Reason:</strong> ${d.disapprovedReason}</p>`
+        : ""
+    }
+
+    ${
+      d.dispensed
+        ? `<p><strong>Dispensed By:</strong> ${d.dispensedBy}</p>`
+        : ""
+    }
+
+    <p><strong>Status:</strong> ${d.status}</p>
+  `;
+
+  document.getElementById("detailsBackdrop").style.display = "flex";
+}
+
+document.getElementById("detailsClose").onclick = () => {
+  document.getElementById("detailsBackdrop").style.display = "none";
+};
+
+/* ==========================================================
+   UPDATE STATUS + DELETE
+   ========================================================== */
+async function updateStatus(fileId, status) {
+  showLoading();
+  await fetch(API, {
+    method: "POST",
+    body: JSON.stringify({ action: "updateStatus", fileId, status }),
+  });
+  hideLoading();
+  loadData();
+}
+
+async function deleteEntry(fileId) {
+  showLoading();
+  await fetch(API, {
+    method: "POST",
+    body: JSON.stringify({ action: "deleteEntry", fileId }),
+  });
+  hideLoading();
+  loadData();
+}
+
+/* ==========================================================
+   BACKGROUND REFRESH
+   ========================================================== */
+async function backgroundRefresh() {
+  try {
+    const res = await fetch(API);
+    const json = await res.json();
+    const fresh = json.entries || [];
+
+    if (fresh.length !== ALL_DATA.length) {
+      showUpdatingBadge();
+      saveCache(fresh);
+      ALL_DATA = fresh;
+      renderAll();
+      hideUpdatingBadge();
+    }
+  } catch (err) {
+    console.warn("Background refresh failed:", err);
+  }
+}
+
+/* ==========================================================
+   RENDER PENDING
+   ========================================================== */
+function renderPending() {
+  const search = pendingSearch.value.trim();
+  const container = document.getElementById("pendingList");
+  container.innerHTML = "";
+
+  const filtered = ALL_DATA.filter((e) => {
+    const d = e.data;
+    if (search && !String(d.hospitalNumber).includes(search)) return false;
+    return !["approved", "disapproved", "for_ids_approval"].includes(d.status);
+  });
+
+  filtered.forEach((entry) => {
+    const d = entry.data;
+
+    const card = document.createElement("div");
+    card.className = "card";
+    card.innerHTML = `
+      <div class="card-header">
+        <strong>${d.patientName}</strong>
+        <span class="tag ${d.drugType.toLowerCase()}">${d.drugType}</span>
+      </div>
+
+      <div><strong>Hospital #:</strong> ${d.hospitalNumber}</div>
+      <div><strong>Ward:</strong> ${d.ward}</div>
+      <div><strong>Drug:</strong> ${d.antimicrobial}, ${d.dose}, ${d.frequency}</div>
+
+      ${
+        d.drugType === "Restricted"
+          ? `<div><strong>IDS:</strong> ${d.idSpecialist}</div>`
+          : ""
+      }
+
+      <div><strong>Date:</strong> ${d.reqDate}</div>
+
+      <div class="actions">
+        ${
+          d.drugType === "Restricted"
+            ? `<button class="btn for-ids">For IDS Approval</button>`
+            : `<button class="btn approve">Approve</button>`
+        }
+        <button class="btn reject">Disapprove</button>
+        <button class="btn delete">Delete</button>
+      </div>
+    `;
+
+    card.onclick = (ev) => {
+      if (ev.target.closest("button")) return;
+      openDetails(entry);
+    };
+
+    if (card.querySelector(".approve"))
+      card.querySelector(".approve").onclick = (ev) => {
+        ev.stopPropagation();
+        pendingPharmFileId = entry.fileId;
+        pendingPharmAction = "approve";
+        openPharmacistModal();
+      };
+
+    if (card.querySelector(".for-ids"))
+      card.querySelector(".for-ids").onclick = (ev) => {
+        ev.stopPropagation();
+        pendingPharmFileId = entry.fileId;
+        pendingPharmAction = "for_ids_approval";
+        openPharmacistModal();
+      };
+
+    card.querySelector(".reject").onclick = (ev) => {
+      ev.stopPropagation();
+      currentRejectFileId = entry.fileId;
+      document.getElementById("reasonBackdrop").style.display = "flex";
+    };
+
+    card.querySelector(".delete").onclick = (ev) => {
+      ev.stopPropagation();
+      confirmAction("Delete this entry?", () => deleteEntry(entry.fileId));
+    };
+
+    container.appendChild(card);
+  });
+}
+
+/* ==========================================================
+   RENDER LISTS (Approved, Rejected, IDS)
+   ========================================================== */
+function renderList(cfg) {
+  const container = document.getElementById(cfg.listId);
+  container.innerHTML = "";
+
+  const date = cfg.dateField ? document.getElementById(cfg.dateField).value : "";
+  const search = cfg.searchField ? document.getElementById(cfg.searchField).value.trim() : "";
+  const ids = cfg.idsField ? document.getElementById(cfg.idsField).value : "";
+
+  const filtered = ALL_DATA.filter((e) => {
+    const d = e.data;
+    if (cfg.matchStatus && d.status !== cfg.matchStatus) return false;
+    if (date && d.reqDate !== date) return false;
+    if (search && !String(d.hospitalNumber).includes(search)) return false;
+    if (ids && d.idSpecialist !== ids) return false;
+    return true;
+  });
+
+  filtered.forEach((entry) => {
+    const d = entry.data;
+
+    const row = document.createElement("div");
+    row.className = "list-item";
+
+    let actionButtons = "";
+
+    if (cfg.matchStatus === "approved") {
+      actionButtons = `<button class="btn reject disapprove-row">Disapprove</button>`;
+    }
+
+    if (cfg.matchStatus === "disapproved") {
+      actionButtons = `<button class="btn approve approve-row">Approve</button>`;
+    }
+
+    row.innerHTML = `
+      <div style="flex:1;">
+        <strong>${d.patientName}</strong> (${d.hospitalNumber})<br>
+        ${d.antimicrobial} — ${d.dose} (${d.frequency})<br>
+        <span class="tag ${d.drugType.toLowerCase()}">${d.drugType}</span>
+      </div>
+
+      <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem;">
+        <div>${d.reqDate}</div>
+        <div style="display:flex; gap:0.4rem;">
+          ${actionButtons}
+          <button class="btn delete delete-row">Delete</button>
+        </div>
+      </div>
+    `;
+
+    row.onclick = () => openDetails(entry);
+
+    const delBtn = row.querySelector(".delete-row");
+    delBtn.onclick = (ev) => {
+      ev.stopPropagation();
+      confirmAction("Delete this entry?", () => deleteEntry(entry.fileId));
+    };
+
+    const disBtn = row.querySelector(".disapprove-row");
+    if (disBtn) {
+      disBtn.onclick = async (ev) => {
+        ev.stopPropagation();
+        await updateStatus(entry.fileId, "disapproved");
+        loadData();
+      };
+    }
+
+    const apBtn = row.querySelector(".approve-row");
+    if (apBtn) {
+      apBtn.onclick = async (ev) => {
+        ev.stopPropagation();
+        await updateStatus(entry.fileId, "approved");
+        loadData();
+      };
+    }
+
+    container.appendChild(row);
+  });
+}
+
+/* ==========================================================
+   ANALYSIS
+   ========================================================== */
+function applyAnalysisFilters() {
+  const f = fromDate.value;
+  const t = toDate.value;
+  const w = wardFilter.value;
+  const type = typeFilter.value;
+  const ap = apFilter.value;
+  const ids = idsFilterAnalysis.value;
+
+  const data = ALL_DATA.filter((e) => {
+    const d = e.data;
+    if (f && d.reqDate < f) return false;
+    if (t && d.reqDate > t) return false;
+    if (w && d.ward !== w) return false;
+    if (type && d.drugType !== type) return false;
+    if (ap && d.mode !== ap) return false;
+    if (ids && d.idSpecialist !== ids) return false;
+    return true;
+  });
+
+  renderAnalysisTiles(data);
+  renderCharts(data);
+  renderTopTables(data);
+  renderHeatmap(data);
+}
+
+function renderAnalysisTiles(data) {
+  const tiles = document.getElementById("analysisTiles");
+
+  const total = data.length;
+  const approved = data.filter((e) => e.data.status === "approved").length;
+  const disapproved = data.filter((e) => e.data.status === "disapproved").length;
+  const restricted = data.filter((e) => e.data.drugType === "Restricted").length;
+  const monitored = data.filter((e) => e.data.drugType === "Monitored").length;
+
+  tiles.innerHTML = `
+    <div class="tile"><div>Total Requests</div><div class="tile-number">${total}</div></div>
+    <div class="tile"><div>Approved</div><div class="tile-number">${approved}</div></div>
+    <div class="tile"><div>Disapproved</div><div class="tile-number">${disapproved}</div></div>
+    <div class="tile"><div>Restricted</div><div class="tile-number">${restricted}</div></div>
+    <div class="tile"><div>Monitored</div><div class="tile-number">${monitored}</div></div>
+  `;
+}
+
+/* ==========================================================
+   CHARTS
+   ========================================================== */
+function renderCharts(data) {
+  if (chartRequests) chartRequests.destroy();
+  if (chartTopAbx) chartTopAbx.destroy();
+  if (chartApproval) chartApproval.destroy();
+  if (chartIDS) chartIDS.destroy();
+
+  const byDate = {};
+  data.forEach((e) => byDate[e.data.reqDate] = (byDate[e.data.reqDate] || 0) + 1);
+
+  chartRequests = new Chart(document.getElementById("chartRequests"), {
+    type: "line",
+    data: {
+      labels: Object.keys(byDate),
+      datasets: [{
+        label: "Requests",
+        data: Object.values(byDate),
+        borderColor: "#009a3e",
+        borderWidth: 2,
+        fill: false,
+      }]
+    }
+  });
+
+  const byAbx = {};
+  data.forEach((e) => byAbx[e.data.antimicrobial] = (byAbx[e.data.antimicrobial] || 0) + 1);
+
+  chartTopAbx = new Chart(document.getElementById("chartTopAbx"), {
+    type: "bar",
+    data: {
+      labels: Object.keys(byAbx),
+      datasets: [{
+        label: "Top Antibiotics",
+        data: Object.values(byAbx),
+        backgroundColor: "#10b981",
+      }]
+    }
+  });
+
+  const ap = data.filter((e) => e.data.status === "approved").length;
+  const dis = data.filter((e) => e.data.status === "disapproved").length;
+
+  chartApproval = new Chart(document.getElementById("chartApproval"), {
+    type: "pie",
+    data: {
+      labels: ["Approved", "Disapproved"],
+      datasets: [{
+        data: [ap, dis],
+        backgroundColor: ["#009a3e", "#dc2626"],
+      }]
+    }
+  });
+
+  const byIDS = {};
+  data.forEach((e) => {
+    if (!e.data.idSpecialist) return;
+    byIDS[e.data.idSpecialist] = (byIDS[e.data.idSpecialist] || 0) + 1;
+  });
+
+  chartIDS = new Chart(document.getElementById("chartIDS"), {
+    type: "bar",
+    data: {
+      labels: Object.keys(byIDS),
+      datasets: [{
+        label: "IDS Load",
+        data: Object.values(byIDS),
+        backgroundColor: "#f59e0b",
+      }]
+    }
+  });
+}
+
+/* ==========================================================
+   TOP TABLES + HEATMAP
+   ========================================================== */
+function renderTopTables(data) {
+  const byWard = {};
+  const byAbx = {};
+  const byInd = {};
+  const byReject = {};
+  const byIDS = {};
+  const tatValues = [];
+
+  data.forEach((e) => {
+    const d = e.data;
+
+    byWard[d.ward] = (byWard[d.ward] || 0) + 1;
+    byAbx[d.antimicrobial] = (byAbx[d.antimicrobial] || 0) + 1;
+    byInd[d.indication] = (byInd[d.indication] || 0) + 1;
+
+    if (d.disapprovedReason)
+      byReject[d.disapprovedReason] =
+        (byReject[d.disapprovedReason] || 0) + 1;
+
+    if (d.idSpecialist)
+      byIDS[d.idSpecialist] = (byIDS[d.idSpecialist] || 0) + 1;
+
+    if (d.status === "approved" && d.dispensedDate && d.reqDate) {
+      const tat =
+        (new Date(d.dispensedDate) - new Date(d.reqDate)) /
+        (1000 * 60 * 60 * 24);
+      tatValues.push(tat);
+    }
+  });
+
+  document.getElementById("topWards").innerHTML =
+    Object.entries(byWard)
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, v]) => `<div>${k}: <strong>${v}</strong></div>`)
+      .join("") || "No data";
+
+  document.getElementById("topAbx").innerHTML =
+    Object.entries(byAbx)
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, v]) => `<div>${k}: <strong>${v}</strong></div>`)
+      .join("") || "No data";
+
+  document.getElementById("topIndications").innerHTML =
+    Object.entries(byInd)
+      .sort((a, b) => b[1] - a[1])
+      .map(([k, v]) => `<div>${k}: <strong>${v}</strong></div>`)
+      .join("") || "No data";
+
+  document.getElementById("rejectTable").innerHTML =
+    Object.entries(byReject)
+      .map(([k, v]) => `<div>${k}: <strong>${v}</strong></div>`)
+      .join("") || "No data";
+
+  document.getElementById("idsWorkloadTable").innerHTML =
+    Object.entries(byIDS)
+      .map(([k, v]) => `<div>${k}: <strong>${v}</strong></div>`)
+      .join("") || "No data";
+
+  if (tatValues.length) {
+    const avg = (
+      tatValues.reduce((a, b) => a + b, 0) / tatValues.length
+    ).toFixed(1);
+    document.getElementById("tatTable").innerHTML =
+      `Average TAT: <strong>${avg} days</strong>`;
+  } else {
+    document.getElementById("tatTable").innerHTML = "No TAT data";
+  }
+}
+
+function renderHeatmap(data) {
+  const wards = [...new Set(data.map((e) => e.data.ward))];
+  const dates = [...new Set(data.map((e) => e.data.reqDate))].sort();
+
+  const map = {};
+  wards.forEach((w) => (map[w] = {}));
+  data.forEach((e) => {
+    const d = e.data;
+    map[d.ward][d.reqDate] = (map[d.ward][d.reqDate] || 0) + 1;
+  });
+
+  let html = `<table class="heatmap-table"><thead><tr><th>Ward</th>`;
+  dates.forEach((d) => (html += `<th>${d}</th>`));
+  html += `</tr></thead><tbody>`;
+
+  wards.forEach((w) => {
+    html += `<tr><td><strong>${w}</strong></td>`;
+    dates.forEach((date) => {
+      const count = map[w][date] || 0;
+      let cls = "heat-low";
+      if (count >= 5 && count <= 9) cls = "heat-mid";
+      if (count >= 10) cls = "heat-high";
+      html += `<td class="${cls}">${count}</td>`;
+    });
+    html += `</tr>`;
+  });
+
+  html += "</tbody></table>";
+  document.getElementById("heatmapContainer").innerHTML = html;
+}
+
+/* ==========================================================
+   CSV EXPORT
+   ========================================================== */
+function convertToCSV(data) {
+  const header = [
+    "Patient Name",
+    "Hospital #",
+    "Ward",
+    "Drug",
+    "Dose",
+    "Frequency",
+    "Duration",
+    "Drug Type",
+    "Resident",
+    "Date",
+    "Status",
+  ].join(",");
+
+  const rows = data.map((e) => {
+    const d = e.data;
+    return [
+      d.patientName,
+      d.hospitalNumber,
+      d.ward,
+      d.antimicrobial,
+      d.dose,
+      d.frequency,
+      d.duration,
+      d.drugType,
+      d.residentName,
+      d.reqDate,
+      d.status,
+    ].join(",");
+  });
+
+  return header + "\n" + rows.join("\n");
+}
+
+function downloadCSV(filename, csv) {
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  a.click();
+}
+
+exportAllCsv.onclick = () => {
+  downloadCSV("All_Requests.csv", convertToCSV(ALL_DATA));
+};
+
+exportFilteredCsv.onclick = () => {
+  const f = fromDate.value;
+  const t = toDate.value;
+  const w = wardFilter.value;
+  const type = typeFilter.value;
+  const ap = apFilter.value;
+  const ids = idsFilterAnalysis.value;
+
+  const filtered = ALL_DATA.filter((e) => {
+    const d = e.data;
+    if (f && d.reqDate < f) return false;
+    if (t && d.reqDate > t) return false;
+    if (w && d.ward !== w) return false;
+    if (type && d.drugType !== type) return false;
+    if (ap && d.mode !== ap) return false;
+    if (ids && d.idSpecialist !== ids) return false;
+    return true;
+  });
+
+  downloadCSV("Filtered_Requests.csv", convertToCSV(filtered));
+};
+
+/* ==========================================================
+   WARD OPTIONS
+   ========================================================== */
+function loadWardOptions() {
+  const wards = [...new Set(ALL_DATA.map((e) => e.data.ward))].sort();
+  wardFilter.innerHTML = `<option value="">All Wards</option>`;
+  wards.forEach((w) => (wardFilter.innerHTML += `<option>${w}</option>`));
+}
+
+/* ==========================================================
+   RENDER ALL TABS
+   ========================================================== */
+function renderAll() {
+  renderPending();
+
+  renderList({
+    listId: "approvedList",
+    dateField: "approvedDate",
+    searchField: "approvedSearch",
+    matchStatus: "approved",
+  });
+
+  renderList({
+    listId: "rejectedList",
+    dateField: "rejectedDate",
+    searchField: "rejectedSearch",
+    matchStatus: "disapproved",
+  });
+
+  renderList({
+    listId: "idsList",
+    dateField: "idsDate",
+    idsField: "idsFilter",
+    matchStatus: "for_ids_approval",
+  });
+
+  loadWardOptions();
+}
+
+/* ==========================================================
+   TAB SWITCHING
+   ========================================================== */
+document.querySelectorAll(".tab-btn").forEach((btn) => {
+  btn.onclick = () => {
+    document.querySelectorAll(".tab-btn").forEach((b) => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    document.querySelectorAll(".section").forEach((s) => s.classList.remove("active"));
+    document.getElementById(btn.dataset.tab).classList.add("active");
+
+    if (btn.dataset.tab === "analysis") applyAnalysisFilters();
+    else renderAll();
+  };
+});
+
+applyAnalysis.onclick = applyAnalysisFilters;
+
+/* ==========================================================
+   INIT
+   ========================================================== */
+setInterval(() => backgroundRefresh(), 20000);
+window.onload = loadData;
+
+</script>
+</body>
+</html>
