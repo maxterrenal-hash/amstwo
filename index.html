@@ -877,7 +877,7 @@ function renderPending() {
     card.innerHTML = `
       <div class="card-header">
         <strong>${d.patientName}</strong>
-        <span class="tag ${d.drugType.toLowerCase()}">${d.drugType}</span>
+        <span class="tag ${ (d.drugType || "").toLowerCase() }">${d.drugType || "Unknown"}</span>
       </div>
 
       <div><strong>Hospital #:</strong> ${d.hospitalNumber}</div>
@@ -979,7 +979,7 @@ function renderList(cfg) {
       <div style="flex:1;">
         <strong>${d.patientName}</strong> (${d.hospitalNumber})<br>
         ${d.antimicrobial} — ${d.dose} (${d.frequency})<br>
-        <span class="tag ${d.drugType.toLowerCase()}">${d.drugType}</span>
+        <span class="tag ${ (d.drugType || "").toLowerCase() }">${d.drugType || "Unknown"}</span>
       </div>
 
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem;">
