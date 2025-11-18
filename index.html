@@ -778,7 +778,7 @@ function openDetails(entry) {
     <hr>
 
     <p><strong>Resident:</strong> ${d.residentName} (${d.clinicaldept})</p>
-<p><strong>Date:</strong> ${d.requestdate || d.date}</p>
+<p><strong>Date:</strong> ${d.reqdate || d.reqdate || d.requestdate || d.date}</p>
 
     ${
       d.drugtype === "Restricted"
@@ -892,7 +892,7 @@ function renderPending() {
           : ""
       }
 
-      <div><strong>Date:</strong> ${d.requestdate || d.date}</div>
+      <div><strong>Date:</strong> ${d.reqdate || d.reqdate || d.requestdate || d.date}</div>
 
       <div class="actions">
         ${
@@ -955,7 +955,7 @@ function renderList(cfg) {
   const filtered = ALL_DATA.filter((e) => {
     const d = e.data;
     if (cfg.matchStatus && d.status !== cfg.matchStatus) return false;
-    const rowDate = d.requestdate || d.date || "";
+    const rowDate = d.reqdate || d.reqdate || d.requestdate || d.date || "";
     if (date && rowDate !== date) return false;
     if (search && !String(d.hospitalnumber).includes(search)) return false;
     if (ids && d.idsspecialist !== ids) return false;
@@ -988,7 +988,7 @@ function renderList(cfg) {
       </div>
 
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem;">
-          <div>${d.requestdate || d.date}</div>
+          <div>${d.reqdate || d.reqdate || d.requestdate || d.date}</div>
         <div style="display:flex; gap:0.4rem;">
           ${actionButtons}
           <button class="btn delete delete-row">Delete</button>
@@ -1039,7 +1039,7 @@ function applyAnalysisFilters() {
 
   const data = ALL_DATA.filter((e) => {
     const d = e.data;
-    const rowDate = d.requestdate || d.date || "";
+    const rowDate = d.reqdate || d.reqdate || d.requestdate || d.date || "";
     if (f && rowDate < f) return false;
     if (t && rowDate > t) return false;
     if (w && d.ward !== w) return false;
@@ -1172,9 +1172,9 @@ function renderTopTables(data) {
     if (d.idSpecialist)
       byIDS[d.idSpecialist] = (byIDS[d.idSpecialist] || 0) + 1;
 
-    if (d.status === "approved" && d.dispenseddate && d.requestdate || d.date) {
+    if (d.status === "approved" && d.dispenseddate && d.reqdate || d.reqdate || d.requestdate || d.date) {
       const tat =
-        (new Date(d.dispenseddate) - new Date(d.requestdate || d.date)) /
+        (new Date(d.dispenseddate) - new Date(d.reqdate || d.reqdate || d.requestdate || d.date)) /
         (1000 * 60 * 60 * 24);
 
       tatValues.push(tat);
@@ -1228,7 +1228,7 @@ function renderHeatmap(data) {
   wards.forEach((w) => (map[w] = {}));
   data.forEach((e) => {
     const d = e.data;
-    map[d.ward][d.requestdate || d.date] = (map[d.ward][d.requestdate || d.date] || 0) + 1;
+    map[d.ward][d.reqdate || d.reqdate || d.requestdate || d.date] = (map[d.ward][d.reqdate || d.reqdate || d.requestdate || d.date] || 0) + 1;
   });
 
   let html = `<table class="heatmap-table"><thead><tr><th>Ward</th>`;
@@ -1281,7 +1281,7 @@ function convertToCSV(data) {
       d.duration,
       d.drugtype,
       d.residentName,
-      d.requestdate || d.date,
+      d.reqdate || d.reqdate || d.requestdate || d.date,
       d.status,
     ].join(",");
   });
@@ -1312,8 +1312,8 @@ exportFilteredCsv.onclick = () => {
 
   const filtered = ALL_DATA.filter((e) => {
     const d = e.data;
-    if (f && d.requestdate || d.date < f) return false;;
-    if (t && d.requestdate || d.date > t) return false;
+    if (f && d.reqdate || d.reqdate || d.requestdate || d.date < f) return false;;
+    if (t && d.reqdate || d.reqdate || d.requestdate || d.date > t) return false;
     if (w && d.ward !== w) return false;
     if (type && d.drugtype !== type) return false;
     if (ap && d.mode !== ap) return false;
