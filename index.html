@@ -955,10 +955,10 @@ function renderList(cfg) {
   const filtered = ALL_DATA.filter((e) => {
     const d = e.data;
     if (cfg.matchStatus && d.status !== cfg.matchStatus) return false;
-    const rowDate = d.reqdate || d.reqdate || d.requestdate || d.date || "";
+    const rowDate = d.date || d.requestdate || "";
     if (date && rowDate !== date) return false;
     if (search && !String(d.hospitalnumber).includes(search)) return false;
-    if (ids && d.idsspecialist !== ids) return false;
+    if (ids && d.infectiousdiseasespecialist !== ids) return false;
     return true;
   });
 
@@ -1039,13 +1039,13 @@ function applyAnalysisFilters() {
 
   const data = ALL_DATA.filter((e) => {
     const d = e.data;
-    const rowDate = d.reqdate || d.reqdate || d.requestdate || d.date || "";
-    if (f && rowDate < f) return false;
-    if (t && rowDate > t) return false;
+    const rd = d.requestdate || d.date || "";
+    if (f && rd < f) return false;
+    if (t && rd > t) return false;
     if (w && d.ward !== w) return false;
     if (type && d.drugtype !== type) return false;
     if (ap && d.mode !== ap) return false;
-    if (ids && d.idsspecialist !== ids) return false;
+    if (ids && d.infectiousdiseasespecialist !== ids) return false;
     return true;
   });
 
@@ -1317,7 +1317,7 @@ exportFilteredCsv.onclick = () => {
     if (w && d.ward !== w) return false;
     if (type && d.drugtype !== type) return false;
     if (ap && d.mode !== ap) return false;
-    if (ids && d.idsspecialist !== ids) return false;
+    if (ids && d.infectiousdiseasespecialist !== ids) return false;
     return true;
   });
 
