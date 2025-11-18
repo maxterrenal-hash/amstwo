@@ -759,7 +759,7 @@ function openDetails(entry) {
 
   box.innerHTML = `
     <p><strong>Patient:</strong> ${d.patientName} (${d.age} y, ${d.sex})</p>
-    <p><strong>Hospital #:</strong> ${d.hospitalNumber}</p>
+    <p><strong>Hospital #:</strong> ${d.hospitalnumber}</p>
     <p><strong>Ward:</strong> ${d.ward}</p>
     <p><strong>Diagnosis:</strong> ${d.diagnosis}</p>
     <hr>
@@ -772,26 +772,26 @@ function openDetails(entry) {
     <p><strong>Indication:</strong> ${d.indication}</p>
     <hr>
 
-    <p><strong>Scr:</strong> ${d.scrMgDl}</p>
+    <p><strong>Scr:</strong> ${d.scrmgdl}</p>
     <p><strong>SGPT:</strong> ${d.sgpt}</p>
     <p><strong>eGFR:</strong> ${d.egfrText}</p>
     <hr>
 
-    <p><strong>Resident:</strong> ${d.residentName} (${d.clinicalDept})</p>
-    <p><strong>Date:</strong> ${d.reqDate}</p>
+    <p><strong>Resident:</strong> ${d.residentName} (${d.clinicaldept})</p>
+    <p><strong>Date:</strong> ${d.reqdate}</p>
 
     ${
       d.drugtype === "Restricted"
         ? `
-          <p><strong>${resLabel}:</strong> ${d.serviceResidentName}</p>
+          <p><strong>${resLabel}:</strong> ${d.serviceresidentname}</p>
           <p><strong>IDS Specialist:</strong> ${d.idSpecialist}</p>
         `
         : ""
     }
 
     ${
-      d.disapprovedReason
-        ? `<p><strong>Disapproved Reason:</strong> ${d.disapprovedReason}</p>`
+      d.disapprovedreason
+        ? `<p><strong>Disapproved Reason:</strong> ${d.disapprovedreason}</p>`
         : ""
     }
 
@@ -865,7 +865,7 @@ function renderPending() {
 
   const filtered = ALL_DATA.filter((e) => {
     const d = e.data;
-    if (search && !String(d.hospitalNumber).includes(search)) return false;
+    if (search && !String(d.hospitalnumber).includes(search)) return false;
     return !["approved", "disapproved", "for_ids_approval"].includes(d.status);
   });
 
@@ -877,10 +877,12 @@ function renderPending() {
     card.innerHTML = `
       <div class="card-header">
         <strong>${d.patientName}</strong>
-        <span class="tag ${ (d.drugtype || "") }">${d.drugtype || "Unknown"}</span>
+<span class="tag ${ (d.drugtype || "").toLowerCase() }">
+  ${d.drugtype || "Unknown"}
+</span>
       </div>
 
-      <div><strong>Hospital #:</strong> ${d.hospitalNumber}</div>
+      <div><strong>Hospital #:</strong> ${d.hospitalnumber}</div>
       <div><strong>Ward:</strong> ${d.ward}</div>
       <div><strong>Drug:</strong> ${d.antimicrobial}, ${d.dose}, ${d.frequency}</div>
 
@@ -890,7 +892,7 @@ function renderPending() {
           : ""
       }
 
-      <div><strong>Date:</strong> ${d.reqDate}</div>
+      <div><strong>Date:</strong> ${d.reqdate}</div>
 
       <div class="actions">
         ${
@@ -953,9 +955,9 @@ function renderList(cfg) {
   const filtered = ALL_DATA.filter((e) => {
     const d = e.data;
     if (cfg.matchStatus && d.status !== cfg.matchStatus) return false;
-    if (date && d.reqDate !== date) return false;
-    if (search && !String(d.hospitalNumber).includes(search)) return false;
-    if (ids && d.idSpecialist !== ids) return false;
+    if (date && d.reqdate !== date) return false;
+    if (search && !String(d.hospitalnumber).includes(search)) return false;
+    if (ids && d.idsspecialist !== ids) return false;
     return true;
   });
 
@@ -977,13 +979,15 @@ function renderList(cfg) {
 
     row.innerHTML = `
       <div style="flex:1;">
-        <strong>${d.patientName}</strong> (${d.hospitalNumber})<br>
+        <strong>${d.patientName}</strong> (${d.hospitalnumber})<br>
         ${d.antimicrobial} — ${d.dose} (${d.frequency})<br>
-        <span class="tag ${ (d.drugtype || "") }">${d.drugtype || "Unknown"}</span>
+<span class="tag ${ (d.drugtype || "").toLowerCase() }">
+  ${d.drugtype || "Unknown"}
+</span>
       </div>
 
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem;">
-        <div>${d.reqDate}</div>
+        <div>${d.reqdate}</div>
         <div style="display:flex; gap:0.4rem;">
           ${actionButtons}
           <button class="btn delete delete-row">Delete</button>
@@ -1034,12 +1038,12 @@ function applyAnalysisFilters() {
 
   const data = ALL_DATA.filter((e) => {
     const d = e.data;
-    if (f && d.reqDate < f) return false;
-    if (t && d.reqDate > t) return false;
+    if (f && d.reqdate < f) return false;
+    if (t && d.reqdate > t) return false;
     if (w && d.ward !== w) return false;
     if (type && d.drugtype !== type) return false;
     if (ap && d.mode !== ap) return false;
-    if (ids && d.idSpecialist !== ids) return false;
+    if (ids && d.idsspecialist !== ids) return false;
     return true;
   });
 
@@ -1159,16 +1163,16 @@ function renderTopTables(data) {
     byAbx[d.antimicrobial] = (byAbx[d.antimicrobial] || 0) + 1;
     byInd[d.indication] = (byInd[d.indication] || 0) + 1;
 
-    if (d.disapprovedReason)
-      byReject[d.disapprovedReason] =
-        (byReject[d.disapprovedReason] || 0) + 1;
+    if (d.disapprovedreason)
+      byReject[d.disapprovedreason] =
+        (byReject[d.disapprovedreason] || 0) + 1;
 
     if (d.idSpecialist)
       byIDS[d.idSpecialist] = (byIDS[d.idSpecialist] || 0) + 1;
 
-    if (d.status === "approved" && d.dispensedDate && d.reqDate) {
+    if (d.status === "approved" && d.dispenseddate && d.reqdate) {
       const tat =
-        (new Date(d.dispensedDate) - new Date(d.reqDate)) /
+        (new Date(d.dispenseddate) - new Date(d.reqdate)) /
         (1000 * 60 * 60 * 24);
       tatValues.push(tat);
     }
@@ -1221,7 +1225,7 @@ function renderHeatmap(data) {
   wards.forEach((w) => (map[w] = {}));
   data.forEach((e) => {
     const d = e.data;
-    map[d.ward][d.reqDate] = (map[d.ward][d.reqDate] || 0) + 1;
+    map[d.ward][d.reqdate] = (map[d.ward][d.reqdate] || 0) + 1;
   });
 
   let html = `<table class="heatmap-table"><thead><tr><th>Ward</th>`;
@@ -1266,7 +1270,7 @@ function convertToCSV(data) {
     const d = e.data;
     return [
       d.patientName,
-      d.hospitalNumber,
+      d.hospitalnumber,
       d.ward,
       d.antimicrobial,
       d.dose,
@@ -1274,7 +1278,7 @@ function convertToCSV(data) {
       d.duration,
       d.drugtype,
       d.residentName,
-      d.reqDate,
+      d.reqdate,
       d.status,
     ].join(",");
   });
@@ -1305,12 +1309,12 @@ exportFilteredCsv.onclick = () => {
 
   const filtered = ALL_DATA.filter((e) => {
     const d = e.data;
-    if (f && d.reqDate < f) return false;
-    if (t && d.reqDate > t) return false;
+    if (f && d.reqdate < f) return false;
+    if (t && d.reqdate > t) return false;
     if (w && d.ward !== w) return false;
     if (type && d.drugtype !== type) return false;
     if (ap && d.mode !== ap) return false;
-    if (ids && d.idSpecialist !== ids) return false;
+    if (ids && d.idsspecialist !== ids) return false;
     return true;
   });
 
