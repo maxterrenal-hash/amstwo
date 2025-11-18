@@ -768,7 +768,7 @@ function openDetails(entry) {
     <p><strong>Dose:</strong> ${d.dose}</p>
     <p><strong>Frequency:</strong> ${d.frequency}</p>
     <p><strong>Duration:</strong> ${d.duration} days</p>
-    <p><strong>Drug Type:</strong> ${d.drugType}</p>
+    <p><strong>Drug Type:</strong> ${d.drugtype}</p>
     <p><strong>Indication:</strong> ${d.indication}</p>
     <hr>
 
@@ -781,7 +781,7 @@ function openDetails(entry) {
     <p><strong>Date:</strong> ${d.reqDate}</p>
 
     ${
-      d.drugType === "Restricted"
+      d.drugtype === "Restricted"
         ? `
           <p><strong>${resLabel}:</strong> ${d.serviceResidentName}</p>
           <p><strong>IDS Specialist:</strong> ${d.idSpecialist}</p>
@@ -877,7 +877,7 @@ function renderPending() {
     card.innerHTML = `
       <div class="card-header">
         <strong>${d.patientName}</strong>
-        <span class="tag ${ (d.drugType || "") }">${d.drugType || "Unknown"}</span>
+        <span class="tag ${ (d.drugtype || "") }">${d.drugtype || "Unknown"}</span>
       </div>
 
       <div><strong>Hospital #:</strong> ${d.hospitalNumber}</div>
@@ -885,7 +885,7 @@ function renderPending() {
       <div><strong>Drug:</strong> ${d.antimicrobial}, ${d.dose}, ${d.frequency}</div>
 
       ${
-        d.drugType === "Restricted"
+        d.drugtype === "Restricted"
           ? `<div><strong>IDS:</strong> ${d.idSpecialist}</div>`
           : ""
       }
@@ -894,7 +894,7 @@ function renderPending() {
 
       <div class="actions">
         ${
-          d.drugType === "Restricted"
+          d.drugtype === "Restricted"
             ? `<button class="btn for-ids">For IDS Approval</button>`
             : `<button class="btn approve">Approve</button>`
         }
@@ -979,7 +979,7 @@ function renderList(cfg) {
       <div style="flex:1;">
         <strong>${d.patientName}</strong> (${d.hospitalNumber})<br>
         ${d.antimicrobial} — ${d.dose} (${d.frequency})<br>
-        <span class="tag ${ (d.drugType || "") }">${d.drugType || "Unknown"}</span>
+        <span class="tag ${ (d.drugtype || "") }">${d.drugtype || "Unknown"}</span>
       </div>
 
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem;">
@@ -1037,7 +1037,7 @@ function applyAnalysisFilters() {
     if (f && d.reqDate < f) return false;
     if (t && d.reqDate > t) return false;
     if (w && d.ward !== w) return false;
-    if (type && d.drugType !== type) return false;
+    if (type && d.drugtype !== type) return false;
     if (ap && d.mode !== ap) return false;
     if (ids && d.idSpecialist !== ids) return false;
     return true;
@@ -1055,8 +1055,8 @@ function renderAnalysisTiles(data) {
   const total = data.length;
   const approved = data.filter((e) => e.data.status === "approved").length;
   const disapproved = data.filter((e) => e.data.status === "disapproved").length;
-  const restricted = data.filter((e) => e.data.drugType === "Restricted").length;
-  const monitored = data.filter((e) => e.data.drugType === "Monitored").length;
+  const restricted = data.filter((e) => e.data.drugtype === "Restricted").length;
+  const monitored = data.filter((e) => e.data.drugtype === "Monitored").length;
 
   tiles.innerHTML = `
     <div class="tile"><div>Total Requests</div><div class="tile-number">${total}</div></div>
@@ -1272,7 +1272,7 @@ function convertToCSV(data) {
       d.dose,
       d.frequency,
       d.duration,
-      d.drugType,
+      d.drugtype,
       d.residentName,
       d.reqDate,
       d.status,
@@ -1308,7 +1308,7 @@ exportFilteredCsv.onclick = () => {
     if (f && d.reqDate < f) return false;
     if (t && d.reqDate > t) return false;
     if (w && d.ward !== w) return false;
-    if (type && d.drugType !== type) return false;
+    if (type && d.drugtype !== type) return false;
     if (ap && d.mode !== ap) return false;
     if (ids && d.idSpecialist !== ids) return false;
     return true;
