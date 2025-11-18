@@ -78,7 +78,7 @@
    MAIN + TABS (sticky)
    ============================= */
 .main {
-  max-width: 1200px;
+  max-width: 960px;
   margin: 0 auto;
   padding: 0.5rem 1rem 2rem;
 }
@@ -90,23 +90,25 @@
   background: var(--bg-main);
   padding: 0.5rem 0 0.75rem;
   display: flex;
-  gap: 0.5rem;
   flex-wrap: wrap;
+  gap: 0.5rem;
 }
 
 /* FIX BROKEN TABS */
 .section {
   display: none;
+  margin-top: 0.75rem;
 }
 .section.active {
   display: block;
 }
 
+
 .tab-btn {
-  background: white;
+  background: #fff;
   border: 1px solid var(--border);
-  padding: 0.45rem 0.8rem;
-  border-radius: 0.4rem;
+  padding: 0.45rem 0.9rem;
+  border-radius: 999px;
   cursor: pointer;
   font-size: 0.85rem;
 }
