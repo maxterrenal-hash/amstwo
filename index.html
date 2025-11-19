@@ -780,21 +780,23 @@ function openDetails(entry) {
       : "Pediatrics Resident";
 
   box.innerHTML = `
-       <p><strong>Patient:</strong> ${d.patientName || ""} (${d.age || ""} y, ${d.sex || ""})</p>
-      <p><strong>Hospital #:</strong> ${d.hospitalNumber || ""}</p>
-      <p><strong>Ward:</strong> ${d.ward || ""}</p>
-      <p><strong>Diagnosis:</strong> ${d.diagnosis || ""}</p>
-      <hr>
-      <p><strong>Indication:</strong> ${d.indication || ""}</p>
-      <p><strong>Drug:</strong> ${d.antimicrobial || ""}</p>
-      <p><strong>Dose:</strong> ${d.dose || ""}</p>
-      <p><strong>Frequency:</strong> ${d.frequency || ""}</p>
-      <p><strong>Duration:</strong> ${d.duration || ""} days</p>
-      <p><strong>Drug Type:</strong> ${d.drugType || ""}</p>
-      <hr>
-      <p><strong>Scr:</strong> ${d.scrMgDl || ""}</p>
-      <p><strong>SGPT:</strong> ${d.sgpt || ""}</p>
-      <p><strong>eGFR:</strong> ${d.egfrText || ""}</p>
+    <p><strong>Patient:</strong> ${d.patientname} (${d.age} y, ${d.sex})</p>
+    <p><strong>Hospital #:</strong> ${d.hospitalnumber}</p>
+    <p><strong>Ward:</strong> ${d.ward}</p>
+    <p><strong>Diagnosis:</strong> ${d.diagnosis}</p>
+    <hr>
+
+    <p><strong>Drug:</strong> ${d.antimicrobial}</p>
+    <p><strong>Dose:</strong> ${d.dose}</p>
+    <p><strong>Frequency:</strong> ${d.frequency}</p>
+    <p><strong>Duration:</strong> ${d.duration} days</p>
+    <p><strong>Drug Type:</strong> ${d.drugtype}</p>
+    <p><strong>Indication:</strong> ${d.indication}</p>
+    <hr>
+
+    <p><strong>Scr:</strong> ${d.scrMgDl ?? "—"}</p>
+    <p><strong>SGPT:</strong> ${d.sgpt}</p>
+    <p><strong>eGFR:</strong> ${d.egfrtext}</p>
     <hr>
 
     <p><strong>Resident:</strong> ${d.residentname} (${d.clinicaldepartment})</p>
