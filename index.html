@@ -794,7 +794,7 @@ function openDetails(entry) {
     <p><strong>Indication:</strong> ${d.indication}</p>
     <hr>
 
-    <p><strong>Scr:</strong> ${d.scrMgDl ?? "—"}</p>
+    <p><strong>Scr:</strong> ${d.scr || d.scrMgDl || "—"}</p>
     <p><strong>SGPT:</strong> ${d.sgpt}</p>
     <p><strong>eGFR:</strong> ${d.egfrtext}</p>
     <hr>
