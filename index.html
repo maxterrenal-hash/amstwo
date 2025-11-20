@@ -899,7 +899,6 @@ html += `<hr><h4>Additional Fields</h4>`;
     "reqdate","date","status","disapprovedreason","dispensedby","dispenseddate"
   ]);
 
-html += monographHTML;
 
   
 for (const key in d) {
@@ -917,6 +916,12 @@ for (const key in d) {
 
   html += `<p><strong>${label}:</strong> ${d[key]}</p>`;
 }
+
+// After additional fields → add monograph LAST
+if (monographHTML) {
+  html += monographHTML;
+}
+
 
   box.innerHTML = html;
   document.getElementById("detailsBackdrop").style.display = "flex";
