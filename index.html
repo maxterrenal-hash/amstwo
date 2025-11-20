@@ -1035,8 +1035,17 @@ html += `
 `;
 
 // ===== LABS =====
+const scr =
+  d.scrmgdl ??
+  d.scrMgDl ??
+  d.scrmgDl ??
+  d["scr (mg/dl)"] ??
+  d["scr (mg/dL)"] ??
+  d.scr ??
+  null;
+
 html += `
-  ${d.scrmgdl || d.scr || d.scrMgDl ? `<p><strong>Serum Creatinine:</strong> ${d.scrmgdl || d.scr || d.scrMgDl}</p>` : ""}
+  ${scr !== null ? `<p><strong>Serum Creatinine:</strong> ${scr}</p>` : ""}
   ${d.egfrtext ? `<p><strong>eGFR:</strong> ${d.egfrtext}</p>` : ""}
   <hr>
 `;
@@ -1111,6 +1120,10 @@ const usedKeys = new Set([
 ]);
 
 
+// 2) Rename ScrmgDl → Scr (display only)
+if (key.toLowerCase() === "scrmgdl" || key.toLowerCase() === "scrmg/dl" || key.toLowerCase() === "scrmgdl") {
+  label = "Serum Creatinine";
+}
 
   
 for (const key in d) {
