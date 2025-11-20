@@ -444,7 +444,8 @@
        =========================== -->
   <div class="section" id="approved">
     <div class="search-row">
-      <input type="date" id="approvedDate">
+      <input type="date" id="approvedFrom">
+      <input type="date" id="approvedTo">
       <input type="text" id="approvedSearch" placeholder="Search Hospital Number">
     </div>
     <div class="list-container" id="approvedList"></div>
@@ -455,7 +456,8 @@
        =========================== -->
   <div class="section" id="rejected">
     <div class="search-row">
-      <input type="date" id="rejectedDate">
+      <input type="date" id="rejectedFrom">
+      <input type="date" id="rejectedTo">
       <input type="text" id="rejectedSearch" placeholder="Search Hospital Number">
     </div>
     <div class="list-container" id="rejectedList"></div>
@@ -474,7 +476,8 @@
         <option>Dr. Michelle Carandang-Cuvin</option>
         <option>Pia Catrina Tolentino Torres</option>
       </select>
-      <input type="date" id="idsDate">
+      <input type="date" id="idsFrom">
+      <input type="date" id="idsTo">
     </div>
     <div class="list-container" id="idsList"></div>
   </div>
@@ -718,17 +721,27 @@ async function loadData(force = false) {
    DEFAULT DATES
    ========================================================== */
 function setDefaultDates() {
-  const today = new Date().toISOString().split("T")[0];
-  [
-    "pendingDate",
-    "approvedDate",
-    "rejectedDate",
-    "idsDate",
-    "fromDate",
-    "toDate"
-  ].forEach(id => {
+  const now = new Date();
+  const today = now.toISOString().split("T")[0];
+
+  const firstOfMonth = new Date(now.getFullYear(), now.getMonth(), 1)
+    .toISOString()
+    .split("T")[0];
+
+  const map = {
+    approvedFrom: firstOfMonth,
+    approvedTo: today,
+    rejectedFrom: firstOfMonth,
+    rejectedTo: today,
+    idsFrom: firstOfMonth,
+    idsTo: today,
+    fromDate: firstOfMonth,
+    toDate: today
+  };
+
+  Object.entries(map).forEach(([id, val]) => {
     const el = document.getElementById(id);
-    if (el && !el.value) el.value = today;
+    if (el && !el.value) el.value = val;
   });
 }
 
@@ -1405,15 +1418,14 @@ function renderList(cfg) {
   const container = document.getElementById(cfg.listId);
   container.innerHTML = "";
 
-  const date = cfg.dateField ? document.getElementById(cfg.dateField).value : "";
-  const search = cfg.searchField ? document.getElementById(cfg.searchField).value.trim() : "";
-  const ids = cfg.idsField ? document.getElementById(cfg.idsField).value : "";
+const from = cfg.fromField ? document.getElementById(cfg.fromField).value : "";
+const to   = cfg.toField   ? document.getElementById(cfg.toField).value : "";
 
-  const filtered = ALL_DATA.filter((e) => {
-    const d = e.data;
-    if (cfg.matchStatus && d.status !== cfg.matchStatus) return false;
-    const rowDate = d.date || d.requestdate || "";
-    if (date && rowDate !== date) return false;
+const rowDate = d.reqdate || d.date || "";
+
+if (from && rowDate < from) return false;
+if (to && rowDate > to) return false;
+
     if (search && !String(d.hospitalnumber).includes(search)) return false;
     if (ids && d.infectiousdiseasespecialist !== ids) return false;
     return true;
@@ -1800,21 +1812,24 @@ function renderAll() {
 
   renderList({
     listId: "approvedList",
-    dateField: "approvedDate",
+    fromField: "approvedFrom",
+    toField: "approvedTo",
     searchField: "approvedSearch",
     matchStatus: "approved",
   });
 
   renderList({
     listId: "rejectedList",
-    dateField: "rejectedDate",
+    fromField: "rejectedFrom",
+    toField: "rejectedTo",
     searchField: "rejectedSearch",
     matchStatus: "disapproved",
   });
 
   renderList({
     listId: "idsList",
-    dateField: "idsDate",
+    fromField: "idsFrom",
+    toField: "idsTo",
     idsField: "idsFilter",
     matchStatus: "for_ids_approval",
   });
