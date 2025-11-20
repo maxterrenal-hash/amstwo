@@ -845,7 +845,49 @@ function openDetails(entry) {
     <hr>
     ${approvalBlock}
     <hr>
-    <h4>Additional Fields</h4>
+// =============================================
+// LOAD MONOGRAPH BASED ON MODE + ANTIBIOTIC
+// =============================================
+// ======================
+// MONOGRAPH INSERTION
+// ======================
+let monographHTML = "";
+
+const drugName = (d.antimicrobial || "").trim();
+const mode = (d.mode || "adult").toLowerCase();
+
+// Normalize: remove trailing "IV" or extra spaces
+const normalizedDrug = drugName.replace(/\bIV\b/gi, "").trim();
+
+// Choose monograph source
+let monograph = null;
+
+if (mode === "pediatric" && typeof PEDIATRIC_MONOGRAPHS !== "undefined") {
+  monograph = PEDIATRIC_MONOGRAPHS[normalizedDrug] || PEDIATRIC_MONOGRAPHS[drugName];
+}
+
+if (!monograph && typeof ADULT_MONOGRAPHS !== "undefined") {
+  monograph = ADULT_MONOGRAPHS[normalizedDrug] || ADULT_MONOGRAPHS[drugName];
+}
+
+// Build monograph block
+if (monograph) {
+  monographHTML = `
+    <hr>
+    <h4>Monograph</h4>
+    ${monograph.spectrum ? `<p><strong>Spectrum:</strong> ${monograph.spectrum}</p>` : ""}
+    ${monograph.dosing ? `<p><strong>Dosing:</strong> ${monograph.dosing}</p>` : ""}
+    ${monograph.renal ? `<p><strong>Renal Adjustment:</strong> ${monograph.renal}</p>` : ""}
+    ${monograph.hepatic ? `<p><strong>Hepatic Adjustment:</strong> ${monograph.hepatic}</p>` : ""}
+    ${monograph.duration ? `<p><strong>Duration:</strong> ${monograph.duration}</p>` : ""}
+    ${monograph.monitoring ? `<p><strong>Monitoring:</strong> ${monograph.monitoring}</p>` : ""}
+  `;
+}
+
+// Insert monograph before Additional Fields
+html += monographHTML;
+html += `<hr><h4>Additional Fields</h4>`;
+
   `;
 
   // AUTO-DUMP all remaining keys not shown above
