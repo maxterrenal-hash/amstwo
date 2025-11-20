@@ -954,10 +954,11 @@ if (!isNaN(enteredDose) && computedLow && computedHigh) {
     doseValidation = `<span class="dose-check-pill dc-ok">Within Suggested</span>`;
 }
 
-// ===============================
-// BUILD FINAL DOSE CHECK HTML
-// ===============================
-const doseCheckHTML = `
+/* ============================================================
+   BUILD DOSE CHECK HTML (NEW LOGIC)
+   ============================================================ */
+
+let doseCheckHTML = `
 <div class="dose-check-box">
   <h4>Dose Check</h4>
 
@@ -965,39 +966,88 @@ const doseCheckHTML = `
     <div>Entered Dose:</div>
     <strong>${d.dose || "—"}</strong>
   </div>
-
-  ${computedLow ? `
-  <div class="dose-check-row">
-    <div>Recommended Range (mg/kg):</div>
-    <strong>${mgkgLow}–${mgkgHigh} mg/kg</strong>
-  </div>
-
-  <div class="dose-check-row">
-    <div>Computed Dose Range (mg):</div>
-    <strong>${computedLow.toFixed(0)}–${computedHigh.toFixed(0)}</strong>
-  </div>` : ""}
-
-  ${renalLow ? `
-  <div class="dose-check-row">
-    <div>Renal-Adjusted Range:</div>
-    <strong>${renalLow.toFixed(0)}–${renalHigh.toFixed(0)} mg</strong>
-  </div>` : ""}
-
-  ${doseValidation ? `
-  <div class="dose-check-row">
-    <div>Validation:</div>
-    ${doseValidation}
-  </div>` : ""}
-
-  <div class="dose-check-row">
-    <div>Renal Category:</div>
-    <span class="dose-check-pill ${
-      eGFR >= 60 ? "dc-ok" :
-      eGFR >= 30 ? "dc-warn" : "dc-bad"
-    }">${renalCategory || "Unknown"}</span>
-  </div>
-</div>
 `;
+
+/* ============================
+   1) WEIGHT-BASED DRUGS ONLY
+   ============================ */
+if (isWeightBased && mgkgLow && mgkgHigh && d.weightkg) {
+
+  doseCheckHTML += `
+    <div class="dose-check-row">
+      <div>Recommended Range (mg/kg):</div>
+      <strong>${mgkgLow}–${mgkgHigh} mg/kg</strong>
+    </div>
+
+    <div class="dose-check-row">
+      <div>Computed Dose Range (mg):</div>
+      <strong>${computedLow.toFixed(0)}–${computedHigh.toFixed(0)}</strong>
+    </div>
+  `;
+
+  // VALIDATION
+  let doseValidation = "";
+  let enteredDose = parseFloat(d.dose);
+
+  if (!isNaN(enteredDose)) {
+    if (enteredDose < computedLow)
+      doseValidation = `<span class="dose-check-pill dc-warn">Lower than Suggested</span>`;
+    else if (enteredDose > computedHigh)
+      doseValidation = `<span class="dose-check-pill dc-bad">Higher than Suggested</span>`;
+    else
+      doseValidation = `<span class="dose-check-pill dc-ok">Within Suggested</span>`;
+  }
+
+  doseCheckHTML += `
+    <div class="dose-check-row">
+      <div>Validation:</div>
+      ${doseValidation || "—"}
+    </div>
+  `;
+
+}
+
+/* ============================
+   2) FIXED-DOSE (NOT WT-BASED)
+   ============================ */
+if (!isWeightBased) {
+  // Show EXACT dosing text from monograph
+  const safeDose = monograph?.dosing || "—";
+
+  doseCheckHTML += `
+    <div class="dose-check-row">
+      <div>Recommended Dose:</div>
+      <strong>${safeDose}</strong>
+    </div>
+  `;
+
+  // Validation for fixed-dose (optional)
+  // If you want validation, keep it; if not, remove this block.
+  if (fixedDoseLow && fixedDoseHigh) {
+    let enteredDose = parseFloat(d.dose);
+    let doseValidation = "";
+
+    if (!isNaN(enteredDose)) {
+      if (enteredDose < fixedDoseLow)
+        doseValidation = `<span class="dose-check-pill dc-warn">Lower than Suggested</span>`;
+      else if (enteredDose > fixedDoseHigh)
+        doseValidation = `<span class="dose-check-pill dc-bad">Higher than Suggested</span>`;
+      else
+        doseValidation = `<span class="dose-check-pill dc-ok">Within Suggested</span>`;
+    }
+
+    doseCheckHTML += `
+      <div class="dose-check-row">
+        <div>Validation:</div>
+        ${doseValidation || "—"}
+      </div>
+    `;
+  }
+}
+
+/* ========== END BLOCK ========== */
+doseCheckHTML += `</div>`;
+
 
 
 
