@@ -1036,6 +1036,7 @@ html += `
 
 // ===== LABS =====
 const scr =
+  d["scrmg/dl"] ??   // ← REAL CLEANED KEY FROM BACKEND
   d.scrmgdl ??
   d.scrMgDl ??
   d.scrmgDl ??
@@ -1134,7 +1135,10 @@ let label = pretty(key);
 
 // FIX — Correct location for renaming Serum Creatinine
 // 2) Rename ScrmgDl → Scr (display only)
-if (key.toLowerCase() === "scrmgdl" || key.toLowerCase() === "scrmg/dl" || key.toLowerCase() === "scrmgdl") {
+if (
+  key.toLowerCase() === "scrmg/dl" ||
+  key.toLowerCase() === "scrmgdl"
+) {
   label = "Serum Creatinine";
 }
 
