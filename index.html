@@ -843,11 +843,18 @@ let monographHTML = "";
 const drugName = (d.antimicrobial || "").trim();
 const mode = (d.mode || "adult").toLowerCase();
 
-// Normalize
+// Normalize drug key
 const normalizedDrug = drugName.replace(/\bIV\b/gi, "").trim();
 
-// Look up monograph
+// Look up monograph FIRST (CRITICAL)
 let monograph = null;
+
+if (mode === "pediatric" && typeof PEDIATRIC_MONOGRAPHS !== "undefined") {
+  monograph = PEDIATRIC_MONOGRAPHS[normalizedDrug] || PEDIATRIC_MONOGRAPHS[drugName];
+}
+if (!monograph && typeof ADULT_MONOGRAPHS !== "undefined") {
+  monograph = ADULT_MONOGRAPHS[normalizedDrug] || ADULT_MONOGRAPHS[drugName];
+}
 
 
 // ===============================
@@ -859,21 +866,20 @@ let mgkgLow = null, mgkgHigh = null;
 
 if (monograph?.dosing) {
 
-  // FIRST, try to match a range like "5–12.5 mg/kg"
+  // FIRST: match a clean range "5–12.5 mg/kg"
   const firstRange = monograph.dosing.match(/(\d+(\.\d+)?)\s*[–-]\s*(\d+(\.\d+)?)\s*mg\/?kg/i);
 
   if (firstRange) {
     mgkgLow = parseFloat(firstRange[1]);
     mgkgHigh = parseFloat(firstRange[3]);
   } else {
-    // SECOND, fallback: match a single mg/kg like "10 mg/kg"
+    // fallback: single mg/kg
     const single = monograph.dosing.match(/(\d+(\.\d+)?)\s*mg\/?kg/i);
     if (single) {
       mgkgLow = mgkgHigh = parseFloat(single[1]);
     }
   }
 }
-
 
 let computedLow = null, computedHigh = null;
 
@@ -963,6 +969,7 @@ const doseCheckHTML = `
   </div>
 </div>
 `;
+
 
 
 
