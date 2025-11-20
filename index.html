@@ -1019,18 +1019,66 @@ const doseCheckHTML = `
     ${d.dispenseddate ? `<p><strong>Dispensed Date:</strong> ${d.dispenseddate}</p>` : ""}
   `;
 
-  // Build top structured block
-  let html = `
-    ${patientBlock}
-    <hr>
-    ${drugBlock}
-    <hr>
-    ${labsBlock}
-    <hr>
-    ${approvalBlock}
+// Build structured block in your preferred order
+let html = "";
+
+// ===== DATE =====
+html += `
+  <p><strong>Date:</strong> ${d.reqdate || d.date || "—"}</p>
+  <hr>
 `;
 
-html += doseCheckHTML;
+// ===== PATIENT INFO =====
+html += `
+  ${d.patientname ? `<p><strong>Name:</strong> ${d.patientname}</p>` : ""}
+  ${d.age || d.sex ? `<p><strong>Age/Sex:</strong> ${d.age || "—"} y, ${d.sex || "—"}</p>` : ""}
+  ${d.hospitalnumber ? `<p><strong>Hospital #:</strong> ${d.hospitalnumber}</p>` : ""}
+  ${d.ward ? `<p><strong>Ward:</strong> ${d.ward}</p>` : ""}
+  ${d.weightkg ? `<p><strong>Weight:</strong> ${d.weightkg} kg</p>` : ""}
+  ${d.heightcm ? `<p><strong>Height:</strong> ${d.heightcm} cm</p>` : ""}
+  <hr>
+`;
+
+// ===== LABS =====
+html += `
+  ${d.scrmgdl || d.scr || d.scrMgDl ? `<p><strong>Serum Creatinine:</strong> ${d.scrmgdl || d.scr || d.scrMgDl}</p>` : ""}
+  ${d.egfrtext ? `<p><strong>eGFR:</strong> ${d.egfrtext}</p>` : ""}
+  <hr>
+`;
+
+// ===== DRUG INFO =====
+html += `
+  ${d.antimicrobial ? `<p><strong>Drug:</strong> ${d.antimicrobial}</p>` : ""}
+  ${d.dose ? `<p><strong>Dose:</strong> ${d.dose}</p>` : ""}
+  ${d.frequency ? `<p><strong>Frequency:</strong> ${d.frequency}</p>` : ""}
+  ${d.duration ? `<p><strong>Duration:</strong> ${d.duration}</p>` : ""}
+  <hr>
+`;
+
+// ===== DOSE CHECKER =====
+html += doseCheckHTML + "<hr>";
+
+// ===== DIAGNOSIS + INDICATION =====
+html += `
+  ${d.diagnosis ? `<p><strong>Diagnosis:</strong> ${d.diagnosis}</p>` : ""}
+  ${d.indication ? `<p><strong>Indication:</strong> ${d.indication}</p>` : ""}
+  ${d.basisforindication ? `<p><strong>Basis for Indication:</strong> ${d.basisforindication}</p>` : ""}
+  <hr>
+`;
+
+// ===== APPROVAL BLOCK =====
+html += `
+  ${d.residentname ? `<p><strong>Resident:</strong> ${d.residentname} (${d.clinicaldepartment || "—"})</p>` : ""}
+  ${d.serviceresidentname ? `<p><strong>Service Resident:</strong> ${d.serviceresidentname}</p>` : ""}
+  ${d.infectiousdiseasespecialist ? `<p><strong>IDS Specialist:</strong> ${d.infectiousdiseasespecialist}</p>` : ""}
+  ${d.status ? `<p><strong>Status:</strong> ${d.status}</p>` : ""}
+  <hr>
+`;
+
+// ===== MONOGRAPH =====
+if (monographHTML) {
+  html += monographHTML;
+}
 
 
 if (mode === "pediatric" && typeof PEDIATRIC_MONOGRAPHS !== "undefined") {
