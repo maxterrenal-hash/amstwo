@@ -1102,13 +1102,14 @@ html += `<hr><h4>Additional Fields</h4>`;
 
 
   // AUTO-DUMP all remaining keys not shown above
-  const usedKeys = new Set([
+const usedKeys = new Set([
     "patientname","age","sex","hospitalnumber","ward","diagnosis","weightkg","heightcm",
     "antimicrobial","dose","frequency","duration","drugtype","indication","basisforindication",
-    "scr","scrmgdl","scrMgDl","sgpt","egfrtext",
+    "scr","scrmgdl","scrMgDl","scrmg/dl","sgpt","egfrtext",
     "residentname","clinicaldepartment","serviceresidentname","infectiousdiseasespecialist",
     "reqdate","date","status","disapprovedreason","dispensedby","dispenseddate"
-  ]);
+]);
+
 
 
   
@@ -1121,9 +1122,6 @@ for (const key in d) {
 
   // 2) Rename ScrmgDl → Scr (display only)
   let label = pretty(key);
-  if (key.toLowerCase() === "scrmgdl" || key.toLowerCase() === "scrmg/dl" || key.toLowerCase() === "scrmgdl") {
-    label = "Serum Creatinine";
-  }
 
   html += `<p><strong>${label}:</strong> ${d[key]}</p>`;
 }
