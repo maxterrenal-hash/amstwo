@@ -835,6 +835,21 @@ function openDetails(entry) {
   const d = entry.data;
   const box = document.getElementById("detailsBody");
 
+// ======================
+// MONOGRAPH INSERTION
+// ======================
+let monographHTML = "";
+
+const drugName = (d.antimicrobial || "").trim();
+const mode = (d.mode || "adult").toLowerCase();
+
+// Normalize
+const normalizedDrug = drugName.replace(/\bIV\b/gi, "").trim();
+
+// Look up monograph
+let monograph = null;
+
+
 // ===============================
 // DOSE RANGE EXTRACTION + COMPUTE
 // ===============================
@@ -939,27 +954,6 @@ let doseCheckHTML = `
 </div>
 `;
 
-    <div class="dose-check-row">
-      <div>Frequency:</div>
-      <strong>${d.frequency || "—"}</strong>
-    </div>
-
-    <div class="dose-check-row">
-      <div>Renal Status:</div>
-      <span class="dose-check-pill ${
-        d.egfrtext && parseFloat(d.egfrtext) >= 60 ? "dc-ok" :
-        d.egfrtext && parseFloat(d.egfrtext) >= 30 ? "dc-warn" :
-        "dc-bad"
-      }">
-        ${d.egfrtext || "Unknown"}
-      </span>
-    </div>
-
-    <small style="opacity:0.7;">
-      *Automatic renal flag is based on eGFR value.
-    </small>
-  </div>
-`;
 
   
   // Helper function to pretty-print labels
@@ -1020,19 +1014,6 @@ let doseCheckHTML = `
 
 html += doseCheckHTML;
 
-// ======================
-// MONOGRAPH INSERTION
-// ======================
-let monographHTML = "";
-
-const drugName = (d.antimicrobial || "").trim();
-const mode = (d.mode || "adult").toLowerCase();
-
-// Normalize
-const normalizedDrug = drugName.replace(/\bIV\b/gi, "").trim();
-
-// Look up monograph
-let monograph = null;
 
 if (mode === "pediatric" && typeof PEDIATRIC_MONOGRAPHS !== "undefined") {
   monograph = PEDIATRIC_MONOGRAPHS[normalizedDrug] || PEDIATRIC_MONOGRAPHS[drugName];
