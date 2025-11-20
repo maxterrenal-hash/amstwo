@@ -819,9 +819,9 @@ function openDetails(entry) {
   `;
 
   const labsBlock = `
+    ${d.egfrtext ? `<p><strong>eGFR:</strong> ${d.egfrtext}</p>` : ""}
     ${d.scrmgdl || d.scr || d.scrMgDl ? `<p><strong>Scr:</strong> ${d.scrmgdl || d.scr || d.scrMgDl}</p>` : ""}
     ${d.sgpt ? `<p><strong>SGPT:</strong> ${d.sgpt}</p>` : ""}
-    ${d.egfrtext ? `<p><strong>eGFR:</strong> ${d.egfrtext}</p>` : ""}
   `;
 
   const approvalBlock = `
