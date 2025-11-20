@@ -577,15 +577,22 @@
       <h3>Disapproval Reason</h3>
     </div>
     <div class="modal-body">
-      <select id="rejectReason" style="width:100%; padding:0.5rem;">
-        <option>No infection</option>
-        <option>Wrong choice</option>
-        <option>Wrong dose</option>
-        <option>Wrong route</option>
-        <option>Wrong duration</option>
-        <option>Others (specify)</option>
-      </select>
-      <input type="text" id="rejectReasonOther" placeholder="Specify..." style="width:100%; margin-top:0.7rem; padding:0.5rem;">
+<select id="rejectReason" style="width:100%; padding:0.5rem;">
+  <option>No infection</option>
+  <option>Wrong choice</option>
+  <option>Wrong dose</option>
+  <option>Wrong route</option>
+  <option>Wrong duration</option>
+  <option>Others (specify)</option>
+</select>
+
+<input type="text" id="rejectReasonOther" placeholder="Specify..." 
+       style="width:100%; margin-top:0.7rem; padding:0.5rem; display:none;">
+
+<textarea id="rejectReasonNotes"
+          placeholder="Add detailed notes here..."
+          style="width:100%; height:120px; margin-top:0.7rem; padding:0.5rem; resize:vertical;"></textarea>
+
       <button class="btn approve" id="rejectSubmit">Submit</button>
       <button class="btn reject" id="rejectCancel">Cancel</button>
     </div>
@@ -751,18 +758,24 @@ document.getElementById("rejectSubmit").onclick = () => {
   if (!currentRejectFileId) return;
 
   let reason = document.getElementById("rejectReason").value;
+  const notes = document.getElementById("rejectReasonNotes").value.trim();
+
   if (reason === "Others (specify)") {
     const other = document.getElementById("rejectReasonOther").value.trim();
     if (other) reason = other;
   }
 
+  // Combine reason + notes for saving
+  const fullReason = notes ? `${reason} — ${notes}` : reason;
+
   pendingPharmAction = "disapprove";
   pendingPharmFileId = currentRejectFileId;
-  pendingPharmExtra = reason;
+  pendingPharmExtra = fullReason;
 
   document.getElementById("reasonBackdrop").style.display = "none";
   openPharmacistModal();
 };
+
 
 /* ==========================================================
    PHARMACIST MODAL
