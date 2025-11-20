@@ -245,6 +245,44 @@
 
 }
 
+.dose-check-box {
+  border: 1px solid var(--border);
+  padding: 0.8rem 1rem;
+  border-radius: 0.6rem;
+  background: #f9fafb;
+  margin: 1rem 0;
+}
+
+.dose-check-row {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+  font-size: 0.9rem;
+}
+
+.dose-check-pill {
+  padding: 0.15rem 0.55rem;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.dc-ok {
+  background: rgba(16,185,129,0.18);
+  color: #065f46;
+}
+
+.dc-warn {
+  background: rgba(245,158,11,0.18);
+  color: #92400e;
+}
+
+.dc-bad {
+  background: rgba(220,38,38,0.18);
+  color: #991b1b;
+}
+
+  
 .modal-header {
   padding: 0.8rem 1rem;
   border-bottom: 1px solid var(--border);
@@ -797,6 +835,38 @@ function openDetails(entry) {
   const d = entry.data;
   const box = document.getElementById("detailsBody");
 
+let doseCheckHTML = `
+  <div class="dose-check-box">
+    <h4>Dose Check</h4>
+
+    <div class="dose-check-row">
+      <div>Entered Dose:</div>
+      <strong>${d.dose || "—"}</strong>
+    </div>
+
+    <div class="dose-check-row">
+      <div>Frequency:</div>
+      <strong>${d.frequency || "—"}</strong>
+    </div>
+
+    <div class="dose-check-row">
+      <div>Renal Status:</div>
+      <span class="dose-check-pill ${
+        d.egfrtext && parseFloat(d.egfrtext) >= 60 ? "dc-ok" :
+        d.egfrtext && parseFloat(d.egfrtext) >= 30 ? "dc-warn" :
+        "dc-bad"
+      }">
+        ${d.egfrtext || "Unknown"}
+      </span>
+    </div>
+
+    <small style="opacity:0.7;">
+      *Automatic renal flag is based on eGFR value.
+    </small>
+  </div>
+`;
+
+  
   // Helper function to pretty-print labels
   function pretty(key) {
     return key
@@ -852,6 +922,9 @@ function openDetails(entry) {
     <hr>
     ${approvalBlock}
 `;
+
+html += doseCheckHTML;
+
 // ======================
 // MONOGRAPH INSERTION
 // ======================
