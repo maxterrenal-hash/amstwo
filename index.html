@@ -55,14 +55,14 @@ header {
   box-shadow: 0 2px 6px rgba(0,0,0,0.15);
 }
 
-header img {
-  height: 48px;
-  width: auto;
+header img { 
+  height: 48px; 
+  width: auto; 
 }
 
-header .title-block {
-  display: flex;
-  flex-direction: column;
+header .title-block { 
+  display: flex; 
+  flex-direction: column; 
 }
 
 header .title-block h1 {
@@ -72,18 +72,19 @@ header .title-block h1 {
   text-transform: uppercase;
 }
 
-header .title-block small {
+header .title-block span {
   font-size: 0.8rem;
   opacity: 0.9;
 }
 
-/* MATCH MOBILE BEHAVIOR EXACTLY */
-@media(max-width: 600px) {
+/* mobile layout */
+@media(max-width:900px){
   header {
     flex-direction: column;
     text-align: center;
   }
 }
+
 
 
 
@@ -414,9 +415,9 @@ header .title-block small {
 
 <header>
   <img src="https://maxterrenal-hash.github.io/justculture/osmak-logo.png" alt="OsMak Logo">
-  <div>
+  <div class="title-block">
     <h1>OSPITAL NG MAKATI</h1>
-    <small>Antimicrobial Request System – Pharmacy Module</small>
+    <span>Antimicrobial Request System – Pharmacy Module</span>
   </div>
 </header>
 
