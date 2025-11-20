@@ -855,8 +855,8 @@ let monograph = null;
 // ===============================
 let mgkgLow = null, mgkgHigh = null;
 
+// detect ranges like "10–15 mg/kg" or "10 - 15 mg/kg"
 if (monograph?.dosing) {
-  // capture "10–15 mg/kg" or "10 - 15 mg/kg"
   const rangeMatch = monograph.dosing.match(/(\d+(\.\d+)?)[\s–-]+(\d+(\.\d+)?)\s*mg\/?kg/i);
   const singleMatch = monograph.dosing.match(/(\d+(\.\d+)?)\s*mg\/?kg/i);
 
@@ -870,14 +870,14 @@ if (monograph?.dosing) {
 
 let computedLow = null, computedHigh = null;
 
-// only compute if we have mg/kg data + weight
+// compute mg/kg dose range
 if (mgkgLow && mgkgHigh && d.weightkg) {
   const wt = parseFloat(d.weightkg);
   computedLow = mgkgLow * wt;
   computedHigh = mgkgHigh * wt;
 }
 
-// renal adjustment
+// RENAL adjustment
 let renalLow = computedLow;
 let renalHigh = computedHigh;
 
@@ -885,38 +885,37 @@ let renalCategory = "";
 let eGFR = parseFloat(d.egfrtext);
 
 if (!isNaN(eGFR)) {
-  if (eGFR >= 60) renalCategory = "Normal";
-  else if (eGFR >= 30) renalCategory = "Mild/Moderate Impairment";
-  else renalCategory = "Severe Impairment";
+  if (eGFR >= 60) renalCategory = "Normal Renal Function";
+  else if (eGFR >= 30) renalCategory = "Mild–Moderate Impairment (↓25%)";
+  else renalCategory = "Severe Impairment (↓50%)";
 
-  if (renalCategory === "Mild/Moderate Impairment") {
+  if (renalCategory.includes("Moderate")) {
     renalLow *= 0.75;
     renalHigh *= 0.75;
   }
-  if (renalCategory === "Severe Impairment") {
+  if (renalCategory.includes("Severe")) {
     renalLow *= 0.50;
     renalHigh *= 0.50;
   }
 }
 
-// weight-based validation
+// VALIDATION
 let doseValidation = "";
 let enteredDose = parseFloat(d.dose);
 
 if (!isNaN(enteredDose) && computedLow && computedHigh) {
-  if (enteredDose < computedLow) {
-    doseValidation = `<span class="dose-check-pill dc-warn">Lower than Range</span>`;
-  } else if (enteredDose > computedHigh) {
-    doseValidation = `<span class="dose-check-pill dc-bad">Higher than Range</span>`;
-  } else {
-    doseValidation = `<span class="dose-check-pill dc-ok">Within Range</span>`;
-  }
+  if (enteredDose < computedLow)
+    doseValidation = `<span class="dose-check-pill dc-warn">Lower than Suggested</span>`;
+  else if (enteredDose > computedHigh)
+    doseValidation = `<span class="dose-check-pill dc-bad">Higher than Suggested</span>`;
+  else
+    doseValidation = `<span class="dose-check-pill dc-ok">Within Suggested</span>`;
 }
 
 // ===============================
-// FINAL DOSE CHECK HTML
+// BUILD FINAL DOSE CHECK HTML
 // ===============================
-let doseCheckHTML = `
+const doseCheckHTML = `
 <div class="dose-check-box">
   <h4>Dose Check</h4>
 
@@ -927,8 +926,13 @@ let doseCheckHTML = `
 
   ${computedLow ? `
   <div class="dose-check-row">
-    <div>Computed Dose Range:</div>
-    <strong>${computedLow.toFixed(0)}–${computedHigh.toFixed(0)} mg</strong>
+    <div>Recommended Range (mg/kg):</div>
+    <strong>${mgkgLow}–${mgkgHigh} mg/kg</strong>
+  </div>
+
+  <div class="dose-check-row">
+    <div>Computed Dose Range (mg):</div>
+    <strong>${computedLow.toFixed(0)}–${computedHigh.toFixed(0)}</strong>
   </div>` : ""}
 
   ${renalLow ? `
@@ -939,20 +943,20 @@ let doseCheckHTML = `
 
   ${doseValidation ? `
   <div class="dose-check-row">
-    <div>Weight-Based Check:</div>
+    <div>Validation:</div>
     ${doseValidation}
   </div>` : ""}
 
   <div class="dose-check-row">
-    <div>Renal Status:</div>
+    <div>Renal Category:</div>
     <span class="dose-check-pill ${
       eGFR >= 60 ? "dc-ok" :
       eGFR >= 30 ? "dc-warn" : "dc-bad"
-    }">${d.egfrtext || "Unknown"}</span>
+    }">${renalCategory || "Unknown"}</span>
   </div>
-
 </div>
 `;
+
 
 
   
@@ -1036,6 +1040,10 @@ if (monograph) {
   `;
 }
 
+// dose check BEFORE monograph
+html += doseCheckHTML;
+
+// Additional fields section
 html += `<hr><h4>Additional Fields</h4>`;
 
 
