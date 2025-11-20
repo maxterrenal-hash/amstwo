@@ -888,7 +888,6 @@ if (monograph) {
 }
 
 html += `<hr><h4>Additional Fields</h4>`;
-html += monographHTML;
 
 
   // AUTO-DUMP all remaining keys not shown above
@@ -900,6 +899,9 @@ html += monographHTML;
     "reqdate","date","status","disapprovedreason","dispensedby","dispenseddate"
   ]);
 
+html += monographHTML;
+
+  
 for (const key in d) {
   if (usedKeys.has(key)) continue;
   if (d[key] === "" || d[key] === null || d[key] === undefined) continue;
