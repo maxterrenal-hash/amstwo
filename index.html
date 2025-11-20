@@ -753,7 +753,7 @@ function setDefaultDates() {
 
   Object.entries(map).forEach(([id, val]) => {
     const el = document.getElementById(id);
-    if (el && !el.value) el.value = val;
+    if (el) el.value = val;   // <-- always set, no conditions
   });
 }
 
