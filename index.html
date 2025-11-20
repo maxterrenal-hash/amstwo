@@ -774,64 +774,84 @@ function openDetails(entry) {
   const d = entry.data;
   const box = document.getElementById("detailsBody");
 
-  const resLabel =
-    d.mode === "adult"
-      ? "Internal Medicine Resident"
-      : "Pediatrics Resident";
+  // Helper function to pretty-print labels
+  function pretty(key) {
+    return key
+      .replace(/([A-Z])/g, " $1")
+      .replace(/_/g, " ")
+      .replace(/\b\w/g, c => c.toUpperCase());
+  }
 
-  box.innerHTML = `
-    <p><strong>Patient:</strong> ${d.patientname} (${d.age} y, ${d.sex})</p>
-    <p><strong>Hospital #:</strong> ${d.hospitalnumber}</p>
-    <p><strong>Ward:</strong> ${d.ward}</p>
-    <p><strong>Diagnosis:</strong> ${d.diagnosis}</p>
-    <hr>
-
-    <p><strong>Drug:</strong> ${d.antimicrobial}</p>
-    <p><strong>Dose:</strong> ${d.dose}</p>
-    <p><strong>Frequency:</strong> ${d.frequency}</p>
-    <p><strong>Duration:</strong> ${d.duration} days</p>
-    <p><strong>Drug Type:</strong> ${d.drugtype}</p>
-    <p><strong>Indication:</strong> ${d.indication}</p>
-    <hr>
-
-    <p><strong>Scr:</strong> ${d.scrmgdl || d.scr || d.scrMgDl || d.Scr || "—"}</p>
-    <p><strong>SGPT:</strong> ${d.sgpt}</p>
-    <p><strong>eGFR:</strong> ${d.egfrtext}</p>
-    <hr>
-
-    <p><strong>Resident:</strong> ${d.residentname} (${d.clinicaldepartment})</p>
-<p><strong>Date:</strong> ${d.reqdate || d.date}</p>
-
-    ${
-      d.drugtype === "Restricted"
-        ? `
-          <p><strong>${resLabel}:</strong> ${d.serviceresidentname}</p>
-          <p><strong>IDS Specialist:</strong> ${d.infectiousdiseasespecialist}</p>
-        `
-        : ""
-    }
-
-    ${
-      d.disapprovedreason
-        ? `<p><strong>Disapproved Reason:</strong> ${d.disapprovedreason}</p>`
-        : ""
-    }
-
-    ${
-      d.dispenseddate
-        ? `<p><strong>Dispensed By:</strong> ${d.dispenseddateBy}</p>`
-        : ""
-    }
-
-    <p><strong>Status:</strong> ${d.status}</p>
+  // Extract known clinical fields (only if they exist)
+  const patientBlock = `
+    ${d.patientname ? `<p><strong>Patient:</strong> ${d.patientname} (${d.age || "—"} y, ${d.sex || "—"})</p>` : ""}
+    ${d.hospitalnumber ? `<p><strong>Hospital #:</strong> ${d.hospitalnumber}</p>` : ""}
+    ${d.ward ? `<p><strong>Ward:</strong> ${d.ward}</p>` : ""}
+    ${d.diagnosis ? `<p><strong>Diagnosis:</strong> ${d.diagnosis}</p>` : ""}
+    ${d.weightkg ? `<p><strong>Weight:</strong> ${d.weightkg} kg</p>` : ""}
+    ${d.heightcm ? `<p><strong>Height:</strong> ${d.heightcm} cm</p>` : ""}
   `;
 
+  const drugBlock = `
+    ${d.antimicrobial ? `<p><strong>Drug:</strong> ${d.antimicrobial}</p>` : ""}
+    ${d.dose ? `<p><strong>Dose:</strong> ${d.dose}</p>` : ""}
+    ${d.frequency ? `<p><strong>Frequency:</strong> ${d.frequency}</p>` : ""}
+    ${d.duration ? `<p><strong>Duration:</strong> ${d.duration} days</p>` : ""}
+    ${d.drugtype ? `<p><strong>Drug Type:</strong> ${d.drugtype}</p>` : ""}
+    ${d.indication ? `<p><strong>Indication:</strong> ${d.indication}</p>` : ""}
+    ${d.basisforindication ? `<p><strong>Basis for Indication:</strong> ${d.basisforindication}</p>` : ""}
+  `;
+
+  const labsBlock = `
+    ${d.scrmgdl || d.scr || d.scrMgDl ? `<p><strong>Scr:</strong> ${d.scrmgdl || d.scr || d.scrMgDl}</p>` : ""}
+    ${d.sgpt ? `<p><strong>SGPT:</strong> ${d.sgpt}</p>` : ""}
+    ${d.egfrtext ? `<p><strong>eGFR:</strong> ${d.egfrtext}</p>` : ""}
+  `;
+
+  const approvalBlock = `
+    ${d.residentname ? `<p><strong>Resident:</strong> ${d.residentname} (${d.clinicaldepartment || "—"})</p>` : ""}
+    ${d.serviceresidentname ? `<p><strong>Service Resident:</strong> ${d.serviceresidentname}</p>` : ""}
+    ${d.infectiousdiseasespecialist ? `<p><strong>IDS Specialist:</strong> ${d.infectiousdiseasespecialist}</p>` : ""}
+    ${(d.reqdate || d.date) ? `<p><strong>Date:</strong> ${d.reqdate || d.date}</p>` : ""}
+    ${d.status ? `<p><strong>Status:</strong> ${d.status}</p>` : ""}
+    ${d.disapprovedreason ? `<p><strong>Disapproved Reason:</strong> ${d.disapprovedreason}</p>` : ""}
+    ${d.dispensedby ? `<p><strong>Dispensed By:</strong> ${d.dispensedby}</p>` : ""}
+    ${d.dispenseddate ? `<p><strong>Dispensed Date:</strong> ${d.dispenseddate}</p>` : ""}
+  `;
+
+  // Build top structured block
+  let html = `
+    ${patientBlock}
+    <hr>
+    ${drugBlock}
+    <hr>
+    ${labsBlock}
+    <hr>
+    ${approvalBlock}
+    <hr>
+    <h4>Additional Fields</h4>
+  `;
+
+  // AUTO-DUMP all remaining keys not shown above
+  const usedKeys = new Set([
+    "patientname","age","sex","hospitalnumber","ward","diagnosis","weightkg","heightcm",
+    "antimicrobial","dose","frequency","duration","drugtype","indication","basisforindication",
+    "scr","scrmgdl","scrMgDl","sgpt","egfrtext",
+    "residentname","clinicaldepartment","serviceresidentname","infectiousdiseasespecialist",
+    "reqdate","date","status","disapprovedreason","dispensedby","dispenseddate"
+  ]);
+
+  for (const key in d) {
+    if (usedKeys.has(key)) continue;
+    if (d[key] === "" || d[key] === null || d[key] === undefined) continue;
+
+    html += `<p><strong>${pretty(key)}:</strong> ${d[key]}</p>`;
+  }
+
+  box.innerHTML = html;
   document.getElementById("detailsBackdrop").style.display = "flex";
 }
 
-document.getElementById("detailsClose").onclick = () => {
-  document.getElementById("detailsBackdrop").style.display = "none";
-};
 
 /* ==========================================================
    UPDATE STATUS + DELETE
