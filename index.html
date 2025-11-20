@@ -1004,15 +1004,7 @@ if (isWeightBased && mgkgLow && mgkgHigh && d.weightkg) {
       ${doseValidation || "—"}
     </div>
   `;
-// ALWAYS show renal category (regardless of weight-based or fixed-dose)
-if (renalCategory) {
-  doseCheckHTML += `
-    <div class="dose-check-row">
-      <div>Renal Category:</div>
-      <strong>${renalCategory}</strong>
-    </div>
-  `;
-}
+
 
 }
 
@@ -1053,7 +1045,15 @@ if (!isWeightBased) {
     `;
   }
 }
-
+// ALWAYS show renal category (regardless of weight-based or fixed-dose)
+if (renalCategory) {
+  doseCheckHTML += `
+    <div class="dose-check-row">
+      <div>Renal Category:</div>
+      <strong>${renalCategory}</strong>
+    </div>
+  `;
+}
 
 /* ========== END BLOCK ========== */
 doseCheckHTML += `</div>`;
