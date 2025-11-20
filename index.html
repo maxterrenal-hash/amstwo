@@ -1133,11 +1133,8 @@ for (const key in d) {
 let label = pretty(key);
 
 // FIX — Correct location for renaming Serum Creatinine
-if (
-  key.toLowerCase() === "scrmgdl" ||
-  key.toLowerCase() === "scrmg/dl" ||
-  key.toLowerCase() === "scrmgdl"
-) {
+// 2) Rename ScrmgDl → Scr (display only)
+if (key.toLowerCase() === "scrmgdl" || key.toLowerCase() === "scrmg/dl" || key.toLowerCase() === "scrmgdl") {
   label = "Serum Creatinine";
 }
 
