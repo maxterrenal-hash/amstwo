@@ -855,18 +855,26 @@ let monograph = null;
 // ===============================
 let mgkgLow = null, mgkgHigh = null;
 
-// detect ranges like "10–15 mg/kg" or "10 - 15 mg/kg"
-if (monograph?.dosing) {
-  const rangeMatch = monograph.dosing.match(/(\d+(\.\d+)?)[\s–-]+(\d+(\.\d+)?)\s*mg\/?kg/i);
-  const singleMatch = monograph.dosing.match(/(\d+(\.\d+)?)\s*mg\/?kg/i);
+// OPTION 1 — Extract ONLY the first mg/kg range found
+let mgkgLow = null, mgkgHigh = null;
 
-  if (rangeMatch) {
-    mgkgLow  = parseFloat(rangeMatch[1]);
-    mgkgHigh = parseFloat(rangeMatch[3]);
-  } else if (singleMatch) {
-    mgkgLow = mgkgHigh = parseFloat(singleMatch[1]);
+if (monograph?.dosing) {
+
+  // FIRST, try to match a range like "5–12.5 mg/kg"
+  const firstRange = monograph.dosing.match(/(\d+(\.\d+)?)\s*[–-]\s*(\d+(\.\d+)?)\s*mg\/?kg/i);
+
+  if (firstRange) {
+    mgkgLow = parseFloat(firstRange[1]);
+    mgkgHigh = parseFloat(firstRange[3]);
+  } else {
+    // SECOND, fallback: match a single mg/kg like "10 mg/kg"
+    const single = monograph.dosing.match(/(\d+(\.\d+)?)\s*mg\/?kg/i);
+    if (single) {
+      mgkgLow = mgkgHigh = parseFloat(single[1]);
+    }
   }
 }
+
 
 let computedLow = null, computedHigh = null;
 
