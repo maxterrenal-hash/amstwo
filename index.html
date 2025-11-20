@@ -844,10 +844,7 @@ function openDetails(entry) {
     ${labsBlock}
     <hr>
     ${approvalBlock}
-    <hr>
-// =============================================
-// LOAD MONOGRAPH BASED ON MODE + ANTIBIOTIC
-// =============================================
+    ;
 // ======================
 // MONOGRAPH INSERTION
 // ======================
@@ -856,10 +853,10 @@ let monographHTML = "";
 const drugName = (d.antimicrobial || "").trim();
 const mode = (d.mode || "adult").toLowerCase();
 
-// Normalize: remove trailing "IV" or extra spaces
+// Normalize
 const normalizedDrug = drugName.replace(/\bIV\b/gi, "").trim();
 
-// Choose monograph source
+// Look up monograph
 let monograph = null;
 
 if (mode === "pediatric" && typeof PEDIATRIC_MONOGRAPHS !== "undefined") {
@@ -870,7 +867,6 @@ if (!monograph && typeof ADULT_MONOGRAPHS !== "undefined") {
   monograph = ADULT_MONOGRAPHS[normalizedDrug] || ADULT_MONOGRAPHS[drugName];
 }
 
-// Build monograph block
 if (monograph) {
   monographHTML = `
     <hr>
@@ -884,9 +880,9 @@ if (monograph) {
   `;
 }
 
-// Insert monograph before Additional Fields
 html += monographHTML;
 html += `<hr><h4>Additional Fields</h4>`;
+
 
   `;
 
