@@ -1418,16 +1418,28 @@ function renderList(cfg) {
   const container = document.getElementById(cfg.listId);
   container.innerHTML = "";
 
-const from = cfg.fromField ? document.getElementById(cfg.fromField).value : "";
-const to   = cfg.toField   ? document.getElementById(cfg.toField).value : "";
+  const from = cfg.fromField ? document.getElementById(cfg.fromField).value : "";
+  const to   = cfg.toField   ? document.getElementById(cfg.toField).value : "";
+  const search = cfg.searchField ? document.getElementById(cfg.searchField).value.trim() : "";
+  const ids = cfg.idsField ? document.getElementById(cfg.idsField).value : "";
 
-const rowDate = d.reqdate || d.date || "";
+  const filtered = ALL_DATA.filter((e) => {
+    const d = e.data;
 
-if (from && rowDate < from) return false;
-if (to && rowDate > to) return false;
+    // Match status
+    if (cfg.matchStatus && d.status !== cfg.matchStatus) return false;
 
+    // Date range
+    const rd = d.reqdate || d.date || "";
+    if (from && rd < from) return false;
+    if (to && rd > to) return false;
+
+    // Search field
     if (search && !String(d.hospitalnumber).includes(search)) return false;
+
+    // IDS filter (for IDS tab)
     if (ids && d.infectiousdiseasespecialist !== ids) return false;
+
     return true;
   });
 
@@ -1438,11 +1450,9 @@ if (to && rowDate > to) return false;
     row.className = "list-item";
 
     let actionButtons = "";
-
     if (cfg.matchStatus === "approved") {
       actionButtons = `<button class="btn reject disapprove-row">Disapprove</button>`;
     }
-
     if (cfg.matchStatus === "disapproved") {
       actionButtons = `<button class="btn approve approve-row">Approve</button>`;
     }
@@ -1451,13 +1461,13 @@ if (to && rowDate > to) return false;
       <div style="flex:1;">
         <strong>${d.patientname}</strong> (${d.hospitalnumber})<br>
         ${d.antimicrobial} — ${d.dose} (${d.frequency})<br>
-<span class="tag ${ (d.drugtype || "").toLowerCase() }">
-  ${d.drugtype || "Unknown"}
-</span>
+        <span class="tag ${(d.drugtype || "").toLowerCase()}">
+          ${d.drugtype || "Unknown"}
+        </span>
       </div>
 
       <div style="display:flex; flex-direction:column; align-items:flex-end; gap:0.4rem;">
-          <div>${d.reqdate || d.date}</div>
+        <div>${d.reqdate || d.date}</div>
         <div style="display:flex; gap:0.4rem;">
           ${actionButtons}
           <button class="btn delete delete-row">Delete</button>
@@ -1494,6 +1504,7 @@ if (to && rowDate > to) return false;
     container.appendChild(row);
   });
 }
+
 
 /* ==========================================================
    ANALYSIS
