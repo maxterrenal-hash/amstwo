@@ -1120,10 +1120,6 @@ const usedKeys = new Set([
 ]);
 
 
-// 2) Rename ScrmgDl → Scr (display only)
-if (key.toLowerCase() === "scrmgdl" || key.toLowerCase() === "scrmg/dl" || key.toLowerCase() === "scrmgdl") {
-  label = "Serum Creatinine";
-}
 
   
 for (const key in d) {
@@ -1135,7 +1131,12 @@ for (const key in d) {
 
   // 2) Rename ScrmgDl → Scr (display only)
   let label = pretty(key);
+// 2) Rename ScrmgDl → Scr (display only)
+if (key.toLowerCase() === "scrmgdl" || key.toLowerCase() === "scrmg/dl" || key.toLowerCase() === "scrmgdl") {
+  label = "Serum Creatinine";
+}
 
+  
   html += `<p><strong>${label}:</strong> ${d[key]}</p>`;
 }
 
