@@ -862,50 +862,48 @@ if (!monograph && typeof ADULT_MONOGRAPHS !== "undefined") {
 // ===============================
 
 // OPTION 1 — Extract ONLY the first mg/kg range found
-let mgkgLow = null, mgkgHigh = null;
-
-/* =====================================================
-   UNIVERSAL DOSE PARSER (weight-based OR fixed-dose)
-   ===================================================== */
-
-let mgkgLow = null, mgkgHigh = null;
-let fixedDoseLow = null, fixedDoseHigh = null;
+// ===============================
+// DOSE PARSER (supports mg/kg + fixed dose)
+// ===============================
+let mgkgLow = null;
+let mgkgHigh = null;
+let fixedDoseLow = null;
+let fixedDoseHigh = null;
 let isWeightBased = false;
 
 if (monograph?.dosing) {
   const txt = monograph.dosing.toLowerCase();
 
   // 1) mg/kg RANGE
-  let mgkgRange = txt.match(/(\d+(\.\d+)?)\s*[-–]\s*(\d+(\.\d+)?)\s*mg\/?kg/);
+  const mgkgRange = txt.match(/(\d+(\.\d+)?)\s*[-–]\s*(\d+(\.\d+)?)\s*mg\/?kg/);
   if (mgkgRange) {
     mgkgLow = parseFloat(mgkgRange[1]);
     mgkgHigh = parseFloat(mgkgRange[3]);
     isWeightBased = true;
   }
 
-  // 2) single mg/kg
-  let mgkgSingle = txt.match(/(\d+(\.\d+)?)\s*mg\/?kg/);
+  // 2) mg/kg SINGLE
+  const mgkgSingle = txt.match(/(\d+(\.\d+)?)\s*mg\/?kg/);
   if (!isWeightBased && mgkgSingle) {
     mgkgLow = mgkgHigh = parseFloat(mgkgSingle[1]);
     isWeightBased = true;
   }
 
-  // 3) FIXED RANGE (mg OR g)
-  let fixedRange = txt.match(/(\d+(\.\d+)?)\s*[-–]\s*(\d+(\.\d+)?)(?:\s*g|\s*mg)(?!\/?kg)/);
+  // 3) FIXED RANGE (mg or g)
+  const fixedRange = txt.match(/(\d+(\.\d+)?)\s*[-–]\s*(\d+(\.\d+)?)(?:\s*g|\s*mg)(?!\/?kg)/);
   if (!isWeightBased && fixedRange) {
-    fixedDoseLow = parseFloat(fixedRange[1]) * (txt.includes(" g") ? 1000 : 1);
-    fixedDoseHigh = parseFloat(fixedRange[3]) * (txt.includes(" g") ? 1000 : 1);
+    const useG = txt.includes(" g");
+    fixedDoseLow = parseFloat(fixedRange[1]) * (useG ? 1000 : 1);
+    fixedDoseHigh = parseFloat(fixedRange[3]) * (useG ? 1000 : 1);
   }
 
-  // 4) FIXED SINGLE (mg OR g)
-  let fixedSingle = txt.match(/(\d+(\.\d+)?)(?:\s*g|\s*mg)(?!\/?kg)/);
+  // 4) FIXED SINGLE dose
+  const fixedSingle = txt.match(/(\d+(\.\d+)?)(?:\s*g|\s*mg)(?!\/?kg)/);
   if (!isWeightBased && fixedSingle) {
-    const val = parseFloat(fixedSingle[1]) * (txt.includes(" g") ? 1000 : 1);
-    fixedDoseLow = fixedDoseHigh = val;
+    const useG = txt.includes(" g");
+    const dose = parseFloat(fixedSingle[1]) * (useG ? 1000 : 1);
+    fixedDoseLow = fixedDoseHigh = dose;
   }
-}
-
-
 }
 
 let computedLow = null, computedHigh = null;
