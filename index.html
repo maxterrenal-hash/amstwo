@@ -1045,6 +1045,27 @@ if (!isWeightBased) {
   }
 }
 
+/* Always show Renal Category if eGFR exists */
+let eGFR = parseFloat(d.egfrtext);
+let renalCategory = "Unknown";
+
+if (!isNaN(eGFR)) {
+  if (eGFR >= 60) renalCategory = "Normal Renal Function";
+  else if (eGFR >= 30) renalCategory = "Mild–Moderate Impairment (↓25%)";
+  else renalCategory = "Severe Impairment (↓50%)";
+}
+
+doseCheckHTML += `
+  <div class="dose-check-row">
+    <div>Renal Category:</div>
+    <span class="dose-check-pill ${
+      eGFR >= 60 ? "dc-ok" :
+      eGFR >= 30 ? "dc-warn" :
+      "dc-bad"
+    }">${renalCategory}</span>
+  </div>
+`;
+
 /* ========== END BLOCK ========== */
 doseCheckHTML += `</div>`;
 
