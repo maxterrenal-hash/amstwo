@@ -835,14 +835,109 @@ function openDetails(entry) {
   const d = entry.data;
   const box = document.getElementById("detailsBody");
 
-let doseCheckHTML = `
-  <div class="dose-check-box">
-    <h4>Dose Check</h4>
+// ===============================
+// DOSE RANGE EXTRACTION + COMPUTE
+// ===============================
+let mgkgLow = null, mgkgHigh = null;
 
-    <div class="dose-check-row">
-      <div>Entered Dose:</div>
-      <strong>${d.dose || "—"}</strong>
-    </div>
+if (monograph?.dosing) {
+  // capture "10–15 mg/kg" or "10 - 15 mg/kg"
+  const rangeMatch = monograph.dosing.match(/(\d+(\.\d+)?)[\s–-]+(\d+(\.\d+)?)\s*mg\/?kg/i);
+  const singleMatch = monograph.dosing.match(/(\d+(\.\d+)?)\s*mg\/?kg/i);
+
+  if (rangeMatch) {
+    mgkgLow  = parseFloat(rangeMatch[1]);
+    mgkgHigh = parseFloat(rangeMatch[3]);
+  } else if (singleMatch) {
+    mgkgLow = mgkgHigh = parseFloat(singleMatch[1]);
+  }
+}
+
+let computedLow = null, computedHigh = null;
+
+// only compute if we have mg/kg data + weight
+if (mgkgLow && mgkgHigh && d.weightkg) {
+  const wt = parseFloat(d.weightkg);
+  computedLow = mgkgLow * wt;
+  computedHigh = mgkgHigh * wt;
+}
+
+// renal adjustment
+let renalLow = computedLow;
+let renalHigh = computedHigh;
+
+let renalCategory = "";
+let eGFR = parseFloat(d.egfrtext);
+
+if (!isNaN(eGFR)) {
+  if (eGFR >= 60) renalCategory = "Normal";
+  else if (eGFR >= 30) renalCategory = "Mild/Moderate Impairment";
+  else renalCategory = "Severe Impairment";
+
+  if (renalCategory === "Mild/Moderate Impairment") {
+    renalLow *= 0.75;
+    renalHigh *= 0.75;
+  }
+  if (renalCategory === "Severe Impairment") {
+    renalLow *= 0.50;
+    renalHigh *= 0.50;
+  }
+}
+
+// weight-based validation
+let doseValidation = "";
+let enteredDose = parseFloat(d.dose);
+
+if (!isNaN(enteredDose) && computedLow && computedHigh) {
+  if (enteredDose < computedLow) {
+    doseValidation = `<span class="dose-check-pill dc-warn">Lower than Range</span>`;
+  } else if (enteredDose > computedHigh) {
+    doseValidation = `<span class="dose-check-pill dc-bad">Higher than Range</span>`;
+  } else {
+    doseValidation = `<span class="dose-check-pill dc-ok">Within Range</span>`;
+  }
+}
+
+// ===============================
+// FINAL DOSE CHECK HTML
+// ===============================
+let doseCheckHTML = `
+<div class="dose-check-box">
+  <h4>Dose Check</h4>
+
+  <div class="dose-check-row">
+    <div>Entered Dose:</div>
+    <strong>${d.dose || "—"}</strong>
+  </div>
+
+  ${computedLow ? `
+  <div class="dose-check-row">
+    <div>Computed Dose Range:</div>
+    <strong>${computedLow.toFixed(0)}–${computedHigh.toFixed(0)} mg</strong>
+  </div>` : ""}
+
+  ${renalLow ? `
+  <div class="dose-check-row">
+    <div>Renal-Adjusted Range:</div>
+    <strong>${renalLow.toFixed(0)}–${renalHigh.toFixed(0)} mg</strong>
+  </div>` : ""}
+
+  ${doseValidation ? `
+  <div class="dose-check-row">
+    <div>Weight-Based Check:</div>
+    ${doseValidation}
+  </div>` : ""}
+
+  <div class="dose-check-row">
+    <div>Renal Status:</div>
+    <span class="dose-check-pill ${
+      eGFR >= 60 ? "dc-ok" :
+      eGFR >= 30 ? "dc-warn" : "dc-bad"
+    }">${d.egfrtext || "Unknown"}</span>
+  </div>
+
+</div>
+`;
 
     <div class="dose-check-row">
       <div>Frequency:</div>
