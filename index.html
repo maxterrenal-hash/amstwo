@@ -41,39 +41,49 @@
     }
 
     /* HEADER (sticky) */
-    header {
-      padding-top: calc(0.75rem + env(safe-area-inset-top));
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      display: flex;
-      align-items: center;
-      gap: 1rem;
-      padding: 0.75rem 1rem;
-      background: var(--osmak-green);
-      color: #fff;
-      box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    }
-    header img {
-      height: 48px;
-    }
-    header h1 {
-      margin: 0;
-      font-size: 1.05rem;
-      text-transform: uppercase;
-      letter-spacing: 0.03em;
-    }
-    header small {
-      display: block;
-      font-size: 0.8rem;
-      opacity: 0.9;
-    }
+header {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  background: var(--osmak-green);
+  color: #fff;
+  padding: 0.75rem 1rem;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+}
 
-    .main {
-      max-width: 1100px;
-      margin: 0 auto;
-      padding: 0.5rem 1rem 2rem;
-    }
+header img {
+  height: 48px;
+  width: auto;
+}
+
+header .title-block {
+  display: flex;
+  flex-direction: column;
+}
+
+header .title-block h1 {
+  margin: 0;
+  font-size: 1.05rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+header .title-block small {
+  font-size: 0.8rem;
+  opacity: 0.9;
+}
+
+/* >>> MOBILE BEHAVIOR — EXACT MATCH <<< */
+@media(max-width: 600px) {
+  header {
+    flex-direction: column;
+    text-align: center;
+  }
+}
+
 
 
 /* =============================
@@ -402,7 +412,7 @@
 
 <header>
   <img src="https://maxterrenal-hash.github.io/justculture/osmak-logo.png" alt="OsMak Logo">
-  <div>
+  <div class="title-block">
     <h1>OSPITAL NG MAKATI</h1>
     <small>Antimicrobial Request System – Pharmacy Module</small>
   </div>
