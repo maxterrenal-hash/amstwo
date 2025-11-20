@@ -1002,11 +1002,6 @@ const doseCheckHTML = `
     ${d.basisforindication ? `<p><strong>Basis for Indication:</strong> ${d.basisforindication}</p>` : ""}
   `;
 
-  const labsBlock = `
-    ${d.egfrtext ? `<p><strong>eGFR:</strong> ${d.egfrtext}</p>` : ""}
-    ${d.scrmgdl || d.scr || d.scrMgDl ? `<p><strong>Scr:</strong> ${d.scrmgdl || d.scr || d.scrMgDl}</p>` : ""}
-    ${d.sgpt ? `<p><strong>SGPT:</strong> ${d.sgpt}</p>` : ""}
-  `;
 
   const approvalBlock = `
     ${d.residentname ? `<p><strong>Resident:</strong> ${d.residentname} (${d.clinicaldepartment || "—"})</p>` : ""}
