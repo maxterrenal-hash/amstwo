@@ -1440,6 +1440,20 @@ document.querySelectorAll(".tab-btn").forEach((btn) => {
 
 applyAnalysis.onclick = applyAnalysisFilters;
 
+// CLOSE DETAILS MODAL
+document.getElementById("detailsClose").onclick = () => {
+  document.getElementById("detailsBackdrop").style.display = "none";
+};
+
+// OPTIONAL: click outside to close
+document.getElementById("detailsBackdrop").onclick = (ev) => {
+  if (ev.target === document.getElementById("detailsBackdrop")) {
+    document.getElementById("detailsBackdrop").style.display = "none";
+  }
+};
+
+
+  
 /* ==========================================================
    INIT
    ========================================================== */
