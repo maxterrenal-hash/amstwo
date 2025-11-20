@@ -857,12 +857,21 @@ function openDetails(entry) {
     "reqdate","date","status","disapprovedreason","dispensedby","dispenseddate"
   ]);
 
-  for (const key in d) {
-    if (usedKeys.has(key)) continue;
-    if (d[key] === "" || d[key] === null || d[key] === undefined) continue;
+for (const key in d) {
+  if (usedKeys.has(key)) continue;
+  if (d[key] === "" || d[key] === null || d[key] === undefined) continue;
 
-    html += `<p><strong>${pretty(key)}:</strong> ${d[key]}</p>`;
+  // 1) DO NOT DISPLAY TIMESTAMP
+  if (key.toLowerCase() === "timestamp") continue;
+
+  // 2) Rename ScrmgDl → Scr (display only)
+  let label = pretty(key);
+  if (key.toLowerCase() === "scrmgdl" || key.toLowerCase() === "scrmg/dl" || key.toLowerCase() === "scrmgdl") {
+    label = "Serum Creatinine";
   }
+
+  html += `<p><strong>${label}:</strong> ${d[key]}</p>`;
+}
 
   box.innerHTML = html;
   document.getElementById("detailsBackdrop").style.display = "flex";
