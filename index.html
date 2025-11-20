@@ -261,6 +261,22 @@
   cursor: pointer;
 }
 
+/* FIX: Ensure modal is above backdrop */
+#detailsBackdrop {
+  z-index: 150 !important;
+}
+
+#detailsBackdrop .modal-box {
+  z-index: 200 !important;
+  position: relative;
+}
+
+#detailsClose {
+  z-index: 300 !important;
+  position: relative;
+}
+
+  
 /* Reject reason modal */
 #rejectReasonOther {
   display: none;
